@@ -24,7 +24,7 @@ if sys.platform == "win32":
         pass
 
 SKILL_ROOT = os.path.dirname(os.path.abspath(__file__))
-from director import create_project, CATEGORIES, STYLES, FORMATS, AUDIO_MOODS, REGISTRY, ENV
+from director import create_project, CATEGORIES, STYLES, FORMATS, AUDIO_MOODS, REGISTRY, ENV, BriefError
 from validator import validate_project_video
 
 
@@ -165,11 +165,13 @@ def ensure_voiceover(proj_dir: str, plan: dict, options: dict) -> bool:
     provider_cmd = [sys.executable, vo_script, provider, proj_dir]
 
     if provider == "eleven":
-        provider_cmd += ["--voice", options.get("voice", "21m00Tcm4TlvDq8ikWAM")]
-        if options.get("allow_estimated_timing") or options.get("estimate_timing"):
-            provider_cmd.append("--allow-estimated-timing")
+        provider_cmd += ["--voice", (options.get("voice") or "21m00Tcm4TlvDq8ikWAM")]
     elif provider == "fish":
-        provider_cmd += ["--voice", options.get("voice", "default")]
+        provider_cmd += ["--voice", (options.get("voice") or "default")]
+    elif provider == "say":
+        provider_cmd += ["--voice", (options.get("voice") or "Reed (English (US))")]
+    if options.get("allow_estimated_timing") or options.get("estimate_timing"):
+        provider_cmd.append("--allow-estimated-timing")
 
     print(f"  Generating voice-over clips with provider '{provider}'...")
     if not run_process(provider_cmd, timeout=180):
@@ -201,13 +203,25 @@ def generate_animated_video(prompt: str, options: dict) -> dict:
 
     # Step 1: AI Creative Direction & Storyboarding
     print("[1/4] Planning Scene Storyboard...")
-    plan_res = create_project(prompt, options)
+    try:
+        plan_res = create_project(prompt, options)
+    except BriefError as e:
+        print(f"  ✗ Brief error: {e}", file=sys.stderr)
+        return {"success": False, "error": str(e)}
     proj_dir = plan_res["project_dir"]
     plan = plan_res["plan"]
     name = plan["name"]
     print(f"  ✓ Storyboard planned: {len(plan['scenes'])} scenes in {proj_dir}")
     print(f"    Category: {plan.get('category')} | Style: {plan.get('style')} | Format: {plan.get('format')}")
     print(f"    Planner: {plan.get('planner')} | Quality: {plan.get('quality', 'draft')}")
+
+    # Refuse offline-heuristic plans before spending a render on them (use --allow-draft to preview anyway)
+    if plan.get("quality") == "draft-heuristic" and not options.get("allow_draft"):
+        msg = ("this prompt has no shot-by-shot brief and no LLM planner is configured, so the storyboard is "
+               "a generic draft. Write a brief (Scene 1 (Hook, 0–5s): ...), set GROQ_API_KEY or ANTHROPIC_API_KEY, "
+               "or pass --allow-draft to render a preview anyway.")
+        print(f"  ✗ Refusing to render: {msg}", file=sys.stderr)
+        return {"success": False, "error": msg, "project": proj_dir}
 
     # Step 2: Audio Synthesis & Bed Pre-generation & Voice-Over (PL-01)
     print("\n[2/4] Preparing Audio, Voice-Over & Sound Design...")
@@ -270,9 +284,10 @@ def main():
     parser.add_argument("--style", choices=STYLES, help="Visual style preset")
     # DR-01: default is None
     parser.add_argument("--format", choices=FORMATS, default=None, help="Aspect ratio (defaults to 9:16 for social, 16:9 otherwise)")
-    parser.add_argument("--duration", type=float, default=30.0, help="Target duration in seconds")
+    parser.add_argument("--duration", type=float, default=None, help="Target duration in seconds (a brief's own duration wins)")
     parser.add_argument("--mood", choices=AUDIO_MOODS, help="Audio music mood")
     parser.add_argument("--draft", action="store_true", help="Render draft preview (half size, faster)")
+    parser.add_argument("--allow-draft", action="store_true", help="Render a heuristic (generic) draft plan anyway")
     # PL-01: Voice-over options
     parser.add_argument("--no-vo", action="store_true", help="Disable voice-over (make silent or music-only video)")
     parser.add_argument("--vo-provider", choices=["eleven", "fish", "say"], help="Voice-over provider")
@@ -304,6 +319,7 @@ def main():
         "duration": args.duration,
         "mood": args.mood,
         "draft": args.draft,
+        "allow_draft": args.allow_draft,
         "no_vo": args.no_vo,
         "vo_provider": args.vo_provider,
         "voice": args.voice,

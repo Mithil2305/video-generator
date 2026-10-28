@@ -70,20 +70,22 @@ def detect_black_frames(video_path: str, max_duration: float = 3.0) -> List[Dict
 
 def measure_audio_loudness(video_path: str) -> Optional[Dict[str, float]]:
     """Measures integrated loudness (LUFS) and true peak using ffmpeg ebur128 filter."""
+    # ebur128 prints its summary at info level, so -v error would hide it and the measurement would silently fail.
     cmd = [
-        "ffmpeg", "-v", "error", "-i", video_path,
+        "ffmpeg", "-hide_banner", "-nostats", "-i", video_path,
         "-af", "ebur128=peak=true",
         "-f", "null", "-"
     ]
     try:
         res = run_cmd(cmd)
         out = res.stderr
-        i_match = re.search(r"I:\s*(-?[\d\.]+)\s*LUFS", out)
-        tp_match = re.search(r"Peak:\s*(-?[\d\.]+)\s*dBFS", out) or re.search(r"True\s*peak:\s*(-?[\d\.]+)", out)
-        if i_match:
+        # ebur128 logs a running "I:" on every frame; the summary block at the end holds the final value.
+        i_all = re.findall(r"I:\s*(-?[\d\.]+)\s*LUFS", out)
+        tp_all = re.findall(r"Peak:\s*(-?[\d\.]+)\s*dBFS", out)
+        if i_all:
             return {
-                "integrated_lufs": float(i_match.group(1)),
-                "true_peak_db": float(tp_match.group(1)) if tp_match else 0.0
+                "integrated_lufs": float(i_all[-1]),
+                "true_peak_db": float(tp_all[-1]) if tp_all else 0.0
             }
     except Exception:
         pass
@@ -224,6 +226,9 @@ def validate_project_video(proj_dir: str, video_path: Optional[str] = None) -> D
                     "true_peak_db": tp,
                     "target": "-14 LUFS (+/-3 LU), true peak <= 0 dBTP"
                 })
+            else:
+                checks.append({"name": "audio_loudness", "status": "WARN",
+                               "message": "could not measure loudness (ebur128 produced no summary)"})
         else:
             checks.append({
                 "name": "audio_stream",
@@ -275,6 +280,38 @@ def validate_project_video(proj_dir: str, video_path: Optional[str] = None) -> D
                 })
         except Exception:
             pass
+
+    # Brief plans: every scene must start when the brief says, and every voice line must be timed
+    if plan.get("timing") == "fixed":
+        brief_problems = []
+        tl_scenes = []
+        if os.path.exists(tl_path):
+            try:
+                with open(tl_path, "r", encoding="utf-8") as tf:
+                    tl_scenes = json.load(tf).get("scenes", [])
+            except Exception as e:
+                brief_problems.append(f"timeline.json unreadable: {e}")
+        elif any(s.get("vo") for s in plan.get("scenes", [])):
+            brief_problems.append("brief has voice lines but timeline.json is missing")
+        for i, sc in enumerate(plan.get("scenes", [])):
+            if tl_scenes:
+                if i >= len(tl_scenes):
+                    brief_problems.append(f"{sc['id']} is missing from timeline.json")
+                    continue
+                if abs(float(tl_scenes[i]["start"]) - float(sc["start"])) > 0.02:
+                    brief_problems.append(f"{sc['id']} starts at {tl_scenes[i]['start']}s, brief says {sc['start']}s")
+                if sc.get("vo") and not tl_scenes[i].get("words"):
+                    brief_problems.append(f"{sc['id']} has a voice line but no timed words")
+        checks.append({
+            "name": "brief_timing",
+            "status": "PASS" if not brief_problems else "FAIL",
+            "message": "; ".join(brief_problems) if brief_problems else "scenes and voice lines match the brief",
+        })
+
+    # Final renders must not come from the offline heuristic planner
+    if plan.get("quality") == "draft-heuristic" or plan.get("planner") == "heuristic":
+        checks.append({"name": "plan_quality", "status": "FAIL",
+                       "message": "plan came from the offline heuristic planner; use a brief or an LLM planner"})
 
     # VA-02: Valid is true ONLY when there are no FAIL statuses
     all_pass = not any(c.get("status") == "FAIL" for c in checks)

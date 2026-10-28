@@ -1,0 +1,22 @@
+{
+  "image": "ForecastPage.png",
+  "size": [1147, 777],
+  "note": "Normalised rectangles [x, y, w, h] measured on ForecastPage.png. 'zoom' is the target scale when the camera zooms to the region.",
+  "regions": {
+    "verified_badge": {
+      "rect": [0.852, 0.014, 0.135, 0.052],
+      "keywords": ["badge", "reliability", "backtested", "verified", "green"],
+      "zoom": 2.2
+    },
+    "accuracy_line": {
+      "rect": [0.038, 0.852, 0.4, 0.04],
+      "keywords": ["accuracy", "readout", "score", "tested"],
+      "zoom": 1.7
+    },
+    "forecast_chart": {
+      "rect": [0.08, 0.2, 0.9, 0.38],
+      "keywords": ["trend", "chart", "historical", "estimate", "dashed"],
+      "zoom": 1.25
+    }
+  }
+}

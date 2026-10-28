@@ -27,6 +27,8 @@ if sys.platform == "win32":
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 log = logging.getLogger("director")
 
+from brief import BriefError, parse_brief, plan_from_brief, validate_brief_plan
+
 SKILL_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -558,11 +560,19 @@ def enforce_options(plan: Dict[str, Any], opts: Dict[str, Any]) -> Dict[str, Any
     if opts.get("style"):
         plan["style"] = opts["style"]
     if opts.get("format"):
+        if plan.get("timing") == "fixed" and plan.get("format") and opts["format"] != plan["format"]:
+            raise BriefError(f"the brief asks for {plan['format']} but --format is {opts['format']}; "
+                             f"remove --format or edit the brief")
         plan["format"] = opts["format"]
     if opts.get("mood"):
         plan.setdefault("music", {})["mood"] = opts["mood"]
     if opts.get("duration"):
-        rescale_durations(plan, float(opts["duration"]))
+        if plan.get("timing") == "fixed":
+            if abs(float(opts["duration"]) - float(plan["target_duration"])) > 1e-6:
+                raise BriefError(f"the brief asks for {plan['target_duration']:g} seconds but --duration is "
+                                 f"{float(opts['duration']):g}; remove --duration or edit the brief")
+        else:
+            rescale_durations(plan, float(opts["duration"]))
     if opts.get("assets"):
         plan["assets_source"] = opts["assets"]
     return plan
@@ -797,7 +807,6 @@ def local_heuristic_director(prompt: str, options: Dict[str, Any]) -> Dict[str, 
                     "id": "sc_01",
                     "narrative_purpose": "Establish atmospheric world setting",
                     "camera": "zoom_in",
-                    "vo": f"In a world where everything was about to change.",
                     "text": f"{title}",
                     "bg": "dark",
                     "dur": 6.0,
@@ -808,8 +817,7 @@ def local_heuristic_director(prompt: str, options: Dict[str, Any]) -> Dict[str, 
                     "id": "sc_02",
                     "narrative_purpose": "Introduce central journey",
                     "camera": "pan_right",
-                    "vo": f"Every step forward unveiled new horizons.",
-                    "text": "The Journey Begins",
+                    "text": f"{topic}",
                     "bg": "dark",
                     "dur": 6.0,
                     "sfx": [{"name": "riser", "at": 0.5, "gain": 0.4}]
@@ -819,8 +827,7 @@ def local_heuristic_director(prompt: str, options: Dict[str, Any]) -> Dict[str, 
                     "id": "sc_03",
                     "narrative_purpose": "Climactic resolution",
                     "camera": "drift",
-                    "vo": "And there, at the horizon of tomorrow, destiny was forged.",
-                    "text": "Destiny Awaits",
+                    "text": f"{title}",
                     "bg": "dark",
                     "dur": 6.0,
                     "sfx": [{"name": "boom", "at": 1.2, "gain": 0.6}]
@@ -1189,10 +1196,20 @@ def create_project(prompt: str, options: Optional[Dict[str, Any]] = None, target
     """Master entry point: creates an animated video project from prompt and options."""
     opts = options or {}
 
-    # Try LLM director first, fall back to local heuristic director
-    plan = llm_creative_director(prompt, opts)
-    if not plan:
-        plan = local_heuristic_director(prompt, opts)
+    # A shot-by-shot brief in the prompt is authoritative: fixed timings, exact text and voice lines.
+    brief = parse_brief(prompt)
+    if brief:
+        plan = plan_from_brief(brief, prompt, opts, find_matching_asset_directory(prompt, opts.get("assets")))
+        problems = validate_brief_plan(plan)
+        if problems:
+            raise BriefError("; ".join(problems))
+        for w in plan.get("warnings", []):
+            log.warning(w)
+    else:
+        # Try LLM director first, fall back to local heuristic director
+        plan = llm_creative_director(prompt, opts)
+        if not plan:
+            plan = local_heuristic_director(prompt, opts)
 
     # DR-02: Apply options authoritatively
     plan = enforce_options(plan, opts)
@@ -1257,7 +1274,7 @@ def main():
     parser.add_argument("--style", choices=STYLES, help="Visual style preset")
     # DR-01: format default is None
     parser.add_argument("--format", choices=FORMATS, default=None, help="Aspect ratio (defaults to 9:16 for social, 16:9 otherwise)")
-    parser.add_argument("--duration", type=float, default=30.0, help="Target duration in seconds")
+    parser.add_argument("--duration", type=float, default=None, help="Target duration in seconds (a brief's own duration wins)")
     parser.add_argument("--mood", choices=AUDIO_MOODS, help="Audio music mood")
     parser.add_argument("--assets", help="Path to assets folder or asset set name (e.g. assets/yukti-assets)")
     parser.add_argument("--out", help="Custom output directory")

@@ -10,9 +10,10 @@
     "test": "python test/test_generator.py"
   },
   "dependencies": {
-    "playwright-core": "1.48.2",
-    "@fontsource/inter-tight": "5.1.0",
     "@fontsource/instrument-serif": "5.1.0",
-    "@fontsource/jetbrains-mono": "5.1.0"
+    "@fontsource/inter-tight": "5.1.0",
+    "@fontsource/jetbrains-mono": "5.1.0",
+    "gsap": "3.12.5",
+    "playwright-core": "1.48.2"
   }
 }

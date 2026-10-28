@@ -1,0 +1,93 @@
+{
+  "title": "Create a 25-second fast-paced 9:16...",
+  "prompt": "Create a 25-second fast-paced 9:16 product reel for Yukti's predictive sales and demand forecasting. Focus on inventory confidence before placing supplier orders.\n\nNarrative & Visual Flow:\n\nScene 1 (Hook, 0\u20135s): Bold kinetic typography with high-contrast text: \"Next 7 days. Before you order.\" Spoken VO: \"Here are the next 7 days of sales, before you place the order.\"\nScene 2 (UI Demo, 5\u201313s): UI screen showing Yukti's Sales & Demand Forecast. Historical trend lines transition into a dashed forward-looking 7-day estimate with confidence bands. Caption: \"Sales next to expected demand.\"\nScene 3 (Proof / Trust, 13\u201320s): Zoom in on the green \"Backtested Model\" reliability badge and accuracy readout score. Caption: \"Reliability score on every forecast.\" Spoken VO: \"Each forecast has a reliability score, backtested against your past sales. Know what's coming, then order.\"\nScene 4 (CTA, 20\u201325s): Obsidian glass CTA pill with accent sweep: \"Start 7-Day Free Trial\". Subcopy: \"Link in bio\". Spoken VO: \"See your own 7-day forecast on the free trial. Link in bio.\"",
+  "category": "storytelling",
+  "style": "cinematic",
+  "format": "16:9",
+  "brand": {
+    "name": "Yukti",
+    "mark": "assets/yukti-logo.png"
+  },
+  "target_duration": 30.0,
+  "quality": "draft-heuristic",
+  "planner": "heuristic",
+  "fps": 30,
+  "theme": {
+    "accent": "#329CDA",
+    "dark": "#080F1A",
+    "light": "#F6F9FC",
+    "ink": "#0B0E14",
+    "paper": "#E4EEF6"
+  },
+  "music": {
+    "mood": "cinematic",
+    "bpm": 90,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [],
+    "environments": [],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "cinematic",
+      "id": "sc_01",
+      "narrative_purpose": "Establish atmospheric world setting",
+      "camera": "zoom_in",
+      "vo": "In a world where everything was about to change.",
+      "text": "Create a 25-second fast-paced 9:16...",
+      "bg": "dark",
+      "dur": 10.0,
+      "sfx": [
+        {
+          "name": "whoosh",
+          "at": 0.1,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "story",
+      "id": "sc_02",
+      "narrative_purpose": "Introduce central journey",
+      "camera": "pan_right",
+      "vo": "Every step forward unveiled new horizons.",
+      "text": "The Journey Begins",
+      "bg": "dark",
+      "dur": 10.0,
+      "sfx": [
+        {
+          "name": "riser",
+          "at": 0.5,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "story",
+      "id": "sc_03",
+      "narrative_purpose": "Climactic resolution",
+      "camera": "drift",
+      "vo": "And there, at the horizon of tomorrow, destiny was forged.",
+      "text": "Destiny Awaits",
+      "bg": "dark",
+      "dur": 10.0,
+      "sfx": [
+        {
+          "name": "boom",
+          "at": 1.2,
+          "gain": 0.6
+        }
+      ]
+    }
+  ],
+  "assets_source": "assets\\yukti-assets",
+  "name": "create-a-25-second-fast-paced-9-16-a6fb6e"
+}

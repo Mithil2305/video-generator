@@ -642,6 +642,96 @@ def proportional(script_words, x):
 
 
 # ---------- build ----------
+MAX_TEMPO = 1.15   # largest speed-up allowed to fit a voice line into a fixed scene
+
+
+def tempo(x, factor):
+    """Speed a mono signal up by `factor` without changing pitch (ffmpeg atempo)."""
+    raw = np.asarray(x, dtype="<f4").tobytes()
+    out = subprocess.run(
+        ["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-",
+         "-af", f"atempo={factor:.4f}", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-"],
+        input=raw, capture_output=True, check=True).stdout
+    return np.frombuffer(out, dtype="<f4").astype(np.float64)
+
+
+def fixed_layout(plan, us, clips, cfg):
+    """Fixed-timing plans (a brief): scene boundaries come from the plan; each voice line sits inside its scene."""
+    by_scene = {}
+    for u in us:
+        if len(u["scenes"]) != 1:
+            sys.exit(f"fixed timing needs one voice line per scene; line {u['id']} spans scenes {u['scenes']}")
+        by_scene[u["scenes"][0]] = u
+    scenes, placed = [], []
+    for i, sc in enumerate(plan["scenes"]):
+        s0 = float(sc["start"])
+        s1 = s0 + float(sc["dur"])
+        entry = {"start": round(s0, 3), "end": round(s1, 3), "vo_start": s0, "vo_end": s0, "words": []}
+        if i in by_scene:
+            u = by_scene[i]
+            x, words = clips[u["id"]]
+            a = s0 + float(sc.get("pre", cfg.get("pre", 0.12)))
+            window = s1 - a - float(sc.get("post", cfg.get("post", 0.2)))
+            clip_s = len(x) / SR
+            if clip_s > window:
+                factor = clip_s / window
+                if factor > MAX_TEMPO:
+                    sys.exit(f"voice line {u['id']} is {clip_s:.2f}s but {sc['id']} leaves {window:.2f}s for it "
+                             f"(needs {factor:.2f}x, limit {MAX_TEMPO}x). Shorten the line or lengthen the scene.")
+                x = tempo(x, factor)
+                words = [dict(w, s=w["s"] / factor, e=w["e"] / factor) for w in words]
+                print(f"  u{u['id']:02d} sped up {factor:.3f}x to fit {sc['id']}")
+            placed.append((a, x))
+            absw = [{"w": w["w"], "s": round(a + w["s"], 3), "e": round(a + w["e"], 3)} for w in words]
+            entry.update(vo_start=absw[0]["s"] if absw else a, vo_end=absw[-1]["e"] if absw else a, words=absw)
+        scenes.append(entry)
+    return scenes, placed, scenes[-1]["end"]
+
+
+def chained_layout(plan, us, clips, cfg):
+    """Default layout: each scene starts where the previous one ends, and narration sets the lengths."""
+    by_scene = {i: u for u in us for i in u["scenes"]}
+    t = cfg.get("lead", 0.3)
+    scenes, placed = [None] * len(plan["scenes"]), []
+    i = 0
+    while i < len(plan["scenes"]):
+        sc = plan["scenes"][i]
+        if i not in by_scene:                             # visual-only beat
+            d = sc.get("dur", 1.2)
+            scenes[i] = {"start": t, "end": t + d, "vo_start": t, "vo_end": t, "words": []}
+            t += d; i += 1
+            continue
+        u = by_scene[i]
+        x, words = clips[u["id"]]
+        start = t
+        a = start + sc.get("pre", cfg.get("pre", 0.12))
+        placed.append((a, x))
+        absw = [{"w": w["w"], "s": round(a + w["s"], 3), "e": round(a + w["e"], 3)} for w in words]
+        k = 0
+        bounds = []
+        for j, n in zip(u["scenes"], u["n"]):
+            ws = absw[k: k + n]; k += n
+            bounds.append(ws)
+        end_audio = a + len(x) / SR
+        last = plan["scenes"][u["scenes"][-1]]
+        t_end = end_audio + last.get("post", cfg.get("post", 0.28))
+        for q, j in enumerate(u["scenes"]):
+            ws = bounds[q]
+            s0 = start if q == 0 else (bounds[q - 1][-1]["e"] + ws[0]["s"]) / 2 - 0.05
+            e0 = t_end if q == len(u["scenes"]) - 1 else (ws[-1]["e"] + bounds[q + 1][0]["s"]) / 2 - 0.05
+            scenes[j] = {"start": round(s0, 3), "end": round(e0, 3), "vo_start": ws[0]["s"], "vo_end": ws[-1]["e"], "words": ws}
+        # minimum durations (dur) push everything after
+        j = u["scenes"][-1]
+        if plan["scenes"][j].get("dur"):
+            scenes[j]["end"] = max(scenes[j]["end"], scenes[j]["start"] + plan["scenes"][j]["dur"])
+        t = scenes[j]["end"]
+        i = u["scenes"][-1] + 1
+    hold = plan["scenes"][-1].get("hold", cfg.get("hold", 1.3))
+    scenes[-1]["end"] = round(scenes[-1]["end"] + hold, 3)
+    dur = scenes[-1]["end"]
+    return scenes, placed, dur
+
+
 def build(proj, _args=None):
     plan = load_plan(proj)
     us = utterances(plan)
@@ -684,45 +774,10 @@ def build(proj, _args=None):
         flag = " (estimated timings)" if (is_estimated or all(w.get("guess") for w in words)) else ""
         print(f"  u{u['id']:02d} {len(x) / SR:5.2f} s  {u['text'][:64]}{flag}")
 
-    by_scene = {i: u for u in us for i in u["scenes"]}
-    t = cfg.get("lead", 0.3)
-    scenes, placed = [None] * len(plan["scenes"]), []
-    i = 0
-    while i < len(plan["scenes"]):
-        sc = plan["scenes"][i]
-        if i not in by_scene:                             # visual-only beat
-            d = sc.get("dur", 1.2)
-            scenes[i] = {"start": t, "end": t + d, "vo_start": t, "vo_end": t, "words": []}
-            t += d; i += 1
-            continue
-        u = by_scene[i]
-        x, words = clips[u["id"]]
-        start = t
-        a = start + sc.get("pre", cfg.get("pre", 0.12))
-        placed.append((a, x))
-        absw = [{"w": w["w"], "s": round(a + w["s"], 3), "e": round(a + w["e"], 3)} for w in words]
-        k = 0
-        bounds = []
-        for j, n in zip(u["scenes"], u["n"]):
-            ws = absw[k: k + n]; k += n
-            bounds.append(ws)
-        end_audio = a + len(x) / SR
-        last = plan["scenes"][u["scenes"][-1]]
-        t_end = end_audio + last.get("post", cfg.get("post", 0.28))
-        for q, j in enumerate(u["scenes"]):
-            ws = bounds[q]
-            s0 = start if q == 0 else (bounds[q - 1][-1]["e"] + ws[0]["s"]) / 2 - 0.05
-            e0 = t_end if q == len(u["scenes"]) - 1 else (ws[-1]["e"] + bounds[q + 1][0]["s"]) / 2 - 0.05
-            scenes[j] = {"start": round(s0, 3), "end": round(e0, 3), "vo_start": ws[0]["s"], "vo_end": ws[-1]["e"], "words": ws}
-        # minimum durations (dur) push everything after
-        j = u["scenes"][-1]
-        if plan["scenes"][j].get("dur"):
-            scenes[j]["end"] = max(scenes[j]["end"], scenes[j]["start"] + plan["scenes"][j]["dur"])
-        t = scenes[j]["end"]
-        i = u["scenes"][-1] + 1
-    hold = plan["scenes"][-1].get("hold", cfg.get("hold", 1.3))
-    scenes[-1]["end"] = round(scenes[-1]["end"] + hold, 3)
-    dur = scenes[-1]["end"]
+    if plan.get("timing") == "fixed":
+        scenes, placed, dur = fixed_layout(plan, us, clips, cfg)
+    else:
+        scenes, placed, dur = chained_layout(plan, us, clips, cfg)
 
     # PL-03: check against target_duration if set
     target_dur = plan.get("target_duration")
@@ -745,7 +800,7 @@ def build(proj, _args=None):
         "plan_sha256": plan_sha256,
         "duration": round(dur, 3),
         "vo": "vo/vo.wav",
-        "timing": "estimated" if any(all(w.get("guess") for w in s.get("words", [])) for s in scenes if s.get("words")) else "exact",
+        "timing": "estimated" if any(all(w.get("guess") for w in words) for _, words in clips.values()) else "exact",
         "scenes": scenes
     }
     with open(os.path.join(proj, "timeline.json"), "w", encoding="utf-8") as f:
