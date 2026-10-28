@@ -76,3 +76,37 @@ html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
 .chip.box .lbl { color: #a3a3a8; }
 .chip.arrow { background: var(--accent); color: #0b0b0c; flex-direction: column; }
 .chip.arrow .pct { background: #fff; color: #0b0b0c; border-radius: 0.35em; }
+
+/* Universal Animation Engine Styles */
+.scene-canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.story-subtitle {
+  position: absolute; left: 50%; bottom: calc(60px * var(--s)); transform: translateX(-50%);
+  background: rgba(10, 12, 18, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: calc(20px * var(--s));
+  padding: calc(14px * var(--s)) calc(28px * var(--s)); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  max-width: 86%; text-align: center;
+}
+.cinematic-bar { position: absolute; left: 0; right: 0; background: #000; z-index: 50; }
+.cinematic-bar.top { top: 0; height: calc(70px * var(--s)); }
+.cinematic-bar.bottom { bottom: 0; height: calc(70px * var(--s)); }
+.flare {
+  position: absolute; pointer-events: none; height: calc(4px * var(--s)); left: -20%; right: -20%;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 229, 255, 0.1) 20%, rgba(255, 255, 255, 0.95) 50%, rgba(0, 229, 255, 0.1) 80%, transparent 100%);
+  filter: blur(2px) drop-shadow(0 0 18px var(--accent));
+}
+.hud-reticle {
+  position: absolute; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 50%;
+  pointer-events: none;
+}
+.hud-line { position: absolute; background: rgba(255, 255, 255, 0.15); pointer-events: none; }
+.hud-readout {
+  position: absolute; font-family: "JetBrains Mono", monospace; font-size: calc(13px * var(--s));
+  color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.motion-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: rgba(18, 18, 22, 0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: calc(24px * var(--s));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}

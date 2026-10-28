@@ -129,9 +129,48 @@ def key(f=3200, body=180, d=0.045):
     return stereo(norm(x, -8))
 
 
-KIT = {"whoosh": whoosh, "swish": swish, "riser": riser, "boom": boom, "pop": pop, "click": click, "ding": ding,
-       "key1": lambda: key(3200, 180), "key2": lambda: key(2700, 160), "key3": lambda: key(3800, 210),
-       "enter": lambda: key(2200, 120, 0.09)}
+def sparkle(d=0.7):
+    tt = t_(d); x = np.zeros(len(tt))
+    freqs = [2093.0, 2637.0, 3136.0, 4186.0, 5274.0]
+    for i, f in enumerate(freqs):
+        dt = i * 0.06; s = int(dt * SR)
+        k = tt[: len(tt) - s]
+        x[s:] += np.sin(2 * np.pi * f * k) * np.exp(-k * 14) * 0.25
+    return stereo(norm(x, -6), -0.4, 0.4)
+
+
+def laser(d=0.25):
+    tt = t_(d); f = 3500 * np.exp(-tt * 28) + 120
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 12)
+    return stereo(norm(x, -5), 0.2, -0.2)
+
+
+def impact(d=1.4):
+    tt = t_(d); f = 80 * np.exp(-tt * 6) + 35
+    sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 3.5)
+    punch = lp(rng.standard_normal(len(tt)), 350) * np.exp(-tt * 18) * 0.8
+    return stereo(norm(sub + punch, -2))
+
+
+def glitch(d=0.18):
+    tt = t_(d); n = len(tt)
+    x = np.sign(rng.standard_normal(n)) * np.exp(-tt * 25) * 0.4
+    return stereo(norm(bp(x, 400, 7000), -5))
+
+
+def shimmer(d=1.2):
+    tt = t_(d); x = np.zeros(len(tt))
+    for f in (880, 1320, 1760, 2640):
+        x += np.sin(2 * np.pi * f * tt + 0.5 * np.sin(2 * np.pi * 3 * tt)) * env(len(tt), 0.4)
+    return stereo(norm(x, -7), -0.3, 0.3)
+
+
+KIT = {
+    "whoosh": whoosh, "swish": swish, "riser": riser, "boom": boom, "pop": pop, "click": click, "ding": ding, "ping": ding,
+    "key1": lambda: key(3200, 180), "key2": lambda: key(2700, 160), "key3": lambda: key(3800, 210),
+    "enter": lambda: key(2200, 120, 0.09),
+    "sparkle": sparkle, "laser": laser, "impact": impact, "glitch": glitch, "shimmer": shimmer
+}
 
 
 def build_kit(force=False):
@@ -164,17 +203,98 @@ def saw(f, tt):
     return 2 * ph - 1
 
 
-def bed(dur, bpm=112, drop=None, outro=None, transpose=0):
-    """i-VI-III-VII pads and a plucked arp; kick, clap, hats and sub come in at the drop; thins at the outro."""
+def bed_cinematic(dur, bpm=84, transpose=0):
+    """Deep, emotive cinematic ambient bed: warm strings, sub drone, glistening high harmonics."""
+    n = int(dur * SR); out = np.zeros((n, 2))
+    beat = 60.0 / bpm; bar = beat * 4
+    # Dm9 -> Bbmaj7 -> Fmaj9 -> Csus4
+    chords = [(50, [62, 65, 69, 72]), (46, [58, 62, 65, 69]), (41, [57, 60, 65, 69]), (48, [60, 65, 67, 72])]
+    tt_all = np.arange(n) / SR
+    t = 0.0; b = 0
+    while t < dur:
+        root, notes = chords[b % len(chords)]
+        s0, s1 = int(max(0, t) * SR), min(n, int((t + bar) * SR))
+        if s1 > s0:
+            seg_t = tt_all[s0:s1] - t
+            # Lush detuned pad
+            pad = sum(saw(midi(m + transpose) * (1 + det), seg_t) for m in notes for det in (-0.003, 0.0, 0.0035)) / 12
+            pad = lp(pad, 1600)
+            e = np.minimum(1, seg_t / 0.8) * np.minimum(1, (bar - seg_t) / 0.5)
+            out[s0:s1] += stereo(pad * e * 0.28)
+            # Deep sub-bass foundation
+            sub = np.sin(2 * np.pi * midi(root - 12 + transpose) * seg_t) * 0.32
+            out[s0:s1] += stereo(lp(sub * e, 150))
+            # Delicate high shimmering texture
+            shimmer_f = midi(notes[-1] + 12 + transpose)
+            shimmer = np.sin(2 * np.pi * shimmer_f * seg_t) * np.sin(2 * np.pi * 3.5 * seg_t) * 0.03
+            out[s0:s1] += stereo(hp(shimmer * e, 2500), -0.3, 0.3)
+        t += bar; b += 1
+    # Warm stereo reverb tail
+    for dly, g in ((0.28, 0.25), (0.55, 0.14)):
+        d = int(dly * SR); out[d:] += lp(out[:-d, 0], 2000)[:, None] * g
+    fade = np.minimum(1, tt_all / 0.8) * np.minimum(1, (dur - tt_all) / 2.0)
+    return norm(out * fade[:, None], -4)
+
+
+def bed_lofi(dur, bpm=80, transpose=0):
+    """Mellow lo-fi chill bed: electric piano chords, soft low-pass filter, relaxed pace."""
+    n = int(dur * SR); out = np.zeros((n, 2))
+    beat = 60.0 / bpm; bar = beat * 4
+    chords = [(48, [60, 64, 67, 71]), (45, [57, 60, 64, 67]), (41, [53, 57, 60, 64]), (43, [55, 59, 62, 65])]
+    tt_all = np.arange(n) / SR
+    t = 0.0; b = 0
+    while t < dur:
+        root, notes = chords[b % len(chords)]
+        s0, s1 = int(max(0, t) * SR), min(n, int((t + bar) * SR))
+        if s1 > s0:
+            seg_t = tt_all[s0:s1] - t
+            # Warm electric piano-like decayed sine chords
+            chord_sig = sum(np.sin(2 * np.pi * midi(m + transpose) * seg_t) * np.exp(-seg_t * 0.8) for m in notes) / 4
+            e = np.minimum(1, seg_t / 0.05)
+            out[s0:s1] += stereo(lp(chord_sig * e, 1200) * 0.25)
+            # Soft acoustic sub
+            sub = np.sin(2 * np.pi * midi(root - 12 + transpose) * seg_t) * np.exp(-seg_t * 0.5) * 0.3
+            out[s0:s1] += stereo(lp(sub, 180))
+        t += bar; b += 1
+    fade = np.minimum(1, tt_all / 0.5) * np.minimum(1, (dur - tt_all) / 1.5)
+    return norm(out * fade[:, None], -4)
+
+
+def bed_suspense(dur, bpm=75, transpose=0):
+    """Dark atmospheric suspense bed: low drone, dissonant harmonics, tension pulses."""
+    n = int(dur * SR); out = np.zeros((n, 2))
+    tt_all = np.arange(n) / SR
+    # Low C drone with minor 2nd / tritone tension
+    drone_f = midi(36 + transpose)
+    sub = np.sin(2 * np.pi * drone_f * tt_all) * 0.4
+    tension = (saw(drone_f * 1.414, tt_all) * 0.08 + saw(drone_f * 2.01, tt_all) * 0.05)
+    tension = lp(tension, 750)
+    pulse = np.sin(2 * np.pi * 1.25 * tt_all) ** 4
+    out += stereo(sub + tension * pulse)
+    fade = np.minimum(1, tt_all / 1.0) * np.minimum(1, (dur - tt_all) / 2.0)
+    return norm(out * fade[:, None], -4)
+
+
+def bed(dur, bpm=112, drop=None, outro=None, transpose=0, mood="corporate"):
+    """Multi-mood algorithmic music bed generator."""
+    if mood == "silent":
+        return np.zeros((int(dur * SR), 2))
+    elif mood in ("cinematic", "ambient"):
+        return bed_cinematic(dur, bpm if bpm else 84, transpose)
+    elif mood in ("lofi", "educational"):
+        return bed_lofi(dur, bpm if bpm else 80, transpose)
+    elif mood == "suspense":
+        return bed_suspense(dur, bpm if bpm else 75, transpose)
+
+    # Default / corporate / synthwave bed
     n = int(dur * SR); out = np.zeros((n, 2))
     beat = 60.0 / bpm; bar = beat * 4
     drop = drop if drop is not None else min(dur * 0.2, 8 * beat)
     outro = outro if outro is not None else dur
-    first_bar = drop - np.ceil(drop / bar) * bar            # a downbeat lands exactly on the drop
+    first_bar = drop - np.ceil(drop / bar) * bar
     chords = [(45, [57, 60, 64]), (41, [57, 60, 65]), (48, [55, 60, 64]), (43, [55, 59, 62])]
     tt_all = np.arange(n) / SR
 
-    # sidechain pump after the drop
     pump = np.ones(n)
     k = first_bar
     while k < dur:
@@ -196,10 +316,9 @@ def bed(dur, bpm=112, drop=None, outro=None, transpose=0):
             pad = lp(pad, 2400 if post else 900 + 900 * max(0, t / max(drop, 1e-3)))
             e = np.minimum(1, seg_t / 0.25) * np.minimum(1, (bar - seg_t) / 0.05)
             out[s0:s1] += stereo(pad * e * 0.22)
-            if post and t < outro:                         # sub bass on the beat
+            if post and t < outro:
                 sub = np.sin(2 * np.pi * midi(root - 12 + transpose) * seg_t) * 0.35
                 out[s0:s1] += stereo(lp(sub * e, 200))
-            # arp: 8ths through the chord
             arp = [notes[0] + 12, notes[1] + 12, notes[2] + 12, notes[0] + 24, notes[2] + 12, notes[1] + 12, notes[0] + 12, notes[2]]
             for i, m in enumerate(arp):
                 ts = t + i * beat / 2
@@ -211,7 +330,6 @@ def bed(dur, bpm=112, drop=None, outro=None, transpose=0):
                 pl = (np.sin(2 * np.pi * f * kk) + 0.35 * saw(f, kk)) * np.exp(-kk * 11)
                 g = 0.11 if t < drop else 0.13
                 out[a:a + L] += stereo(lp(pl, 3500) * g, 0.35 * (1 if i % 2 else -1), 0.35 * (1 if i % 2 else -1))
-            # drums
             if post and t < outro:
                 for q in range(4):
                     a = int((t + q * beat) * SR)
@@ -230,7 +348,6 @@ def bed(dur, bpm=112, drop=None, outro=None, transpose=0):
                         out[a:a + Lc] += stereo(clap)
         t += bar; b += 1
     out *= pump[:, None]
-    # reverb-ish tail: a couple of filtered echoes
     for dly, g in ((0.19, 0.18), (0.37, 0.09)):
         d = int(dly * SR); out[d:] += lp(out[:-d, 0], 3000)[:, None] * g
     fade = np.minimum(1, tt_all / 0.4) * np.minimum(1, (dur - tt_all) / 1.6)
@@ -268,7 +385,7 @@ def mix(proj, t0=0.0, t1=None):
                 drop = hits[0] if hits else None
             if tl and outro is None:
                 outro = tl["scenes"][-1]["start"]
-            full = bed(t0 + dur, music.get("bpm", 112), drop, outro, music.get("key", 0))
+            full = bed(t0 + dur, music.get("bpm", 112), drop, outro, music.get("key", 0), mood=music.get("mood", "corporate"))
             mus = full[int(t0 * SR): int(t0 * SR) + n]
         # duck under the voice
         e = np.abs(vo[:, 0])

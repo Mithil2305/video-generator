@@ -1,0 +1,160 @@
+{
+  "name": "a-45-second-animated-story-a",
+  "title": "A 45-second animated story about a lonel...",
+  "prompt": "A 45-second animated story about a lonely robot discovering a garden on Mars.",
+  "category": "storytelling",
+  "style": "cinematic",
+  "format": "16:9",
+  "fps": 30,
+  "theme": {
+    "accent": "#00E5FF",
+    "dark": "#060910",
+    "light": "#F2F5F8",
+    "ink": "#0D1117",
+    "paper": "#1A2230"
+  },
+  "music": {
+    "mood": "cinematic",
+    "bpm": 90,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [
+      {
+        "id": "char_unit7",
+        "name": "Unit 7",
+        "type": "sentient_robot",
+        "description": "Weathered bronze and matte titanium frame with a luminous cyan optic lens.",
+        "palette": [
+          "#4F6D7A",
+          "#C0D6DF",
+          "#D8B18A",
+          "#00E5FF"
+        ]
+      }
+    ],
+    "environments": [
+      {
+        "id": "env_mars",
+        "name": "The Crimson Solitude",
+        "description": "Desolate Martian canyons under deep terracotta skies, revealing a hidden geodesic dome.",
+        "palette": [
+          "#8C2D19",
+          "#3D1308",
+          "#E07A5F",
+          "#2A9D8F"
+        ]
+      }
+    ],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "story",
+      "id": "sc_01",
+      "narrative_purpose": "Establish the vast, empty isolation of the Red Planet",
+      "visual_description": "Vast Martian plains of rust and crimson sand under a twin-moon twilight. Wind sculpts dust waves across towering mesas.",
+      "environment": "Martian Canyons at Twilight",
+      "camera": "pan_left",
+      "character": "Unit 7 alone against the horizon",
+      "animation_technique": "procedural_canvas",
+      "particles": "dust",
+      "lighting": "Terracotta dusk with long shadows",
+      "vo": "Four hundred days across the crimson silence. Unit Seven wandered without purpose.",
+      "text": "Sol 412: The Crimson Silence",
+      "bg": "dark",
+      "dur": 10.8,
+      "sfx": [
+        {
+          "name": "whoosh",
+          "at": 0.2,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "story",
+      "id": "sc_02",
+      "narrative_purpose": "The discovery: anomaly on the optic sensors",
+      "visual_description": "Unit 7's single cyan optic sensor pulses. At the base of a shattered obsidian crater, a gentle bioluminescent green glow breaks through the rust.",
+      "environment": "Obsidian Crater Rift",
+      "camera": "zoom_in",
+      "character": "Unit 7 tilts head, sensor flashing rapidly",
+      "animation_technique": "character_motion",
+      "particles": "spores",
+      "lighting": "Cyan sensor spotlight on dark soil",
+      "vo": "Until an unexpected sensor signal broke the stillness.",
+      "text": "[Signal Detected] Coordinates 14.8\u00b0 N",
+      "bg": "dark",
+      "dur": 9.9,
+      "sfx": [
+        {
+          "name": "ping",
+          "at": 0.8,
+          "gain": 0.5
+        },
+        {
+          "name": "swish",
+          "at": 1.5,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "cinematic",
+      "id": "sc_03",
+      "narrative_purpose": "The encounter: an impossibly delicate Martian blossom",
+      "visual_description": "Close-up on a fragile, translucent blossom thriving inside an ancient geodesic pocket. Its petals breathe with emerald light.",
+      "environment": "Hidden Garden Sanctuary",
+      "camera": "drift",
+      "animation_technique": "particle_system",
+      "particles": "fireflies",
+      "lighting": "Emerald bioluminescence reflecting off metallic fingers",
+      "vo": "Not an echo. Not a glitch. Life, blossoming in the forgotten soil.",
+      "text": "Life. Against all odds.",
+      "bg": "dark",
+      "dur": 11.7,
+      "sfx": [
+        {
+          "name": "riser",
+          "at": 0.5,
+          "gain": 0.4
+        },
+        {
+          "name": "boom",
+          "at": 2.2,
+          "gain": 0.5
+        }
+      ]
+    },
+    {
+      "type": "story",
+      "id": "sc_04",
+      "narrative_purpose": "Transformation: from desolate machine to devoted guardian",
+      "visual_description": "Unit 7 shields the tiny flower from a rising wind with mechanical palms, its optical glow warming to gold.",
+      "environment": "Protected Sanctuary",
+      "camera": "zoom_out",
+      "character": "Unit 7 sheltering the blossom with both hands",
+      "animation_technique": "character_motion",
+      "particles": "dust",
+      "lighting": "Warm golden sunrise breaking over Martian peaks",
+      "vo": "For the first time on the barren planet... the quiet was no longer lonely.",
+      "text": "No longer alone.",
+      "bg": "dark",
+      "dur": 12.6,
+      "sfx": [
+        {
+          "name": "whoosh",
+          "at": 0.5,
+          "gain": 0.3
+        }
+      ]
+    }
+  ]
+}

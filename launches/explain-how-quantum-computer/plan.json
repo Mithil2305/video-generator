@@ -1,0 +1,93 @@
+{
+  "name": "explain-how-quantum-computer",
+  "title": "Explain how quantum computers use superp...",
+  "prompt": "Explain how quantum computers use superposition",
+  "category": "educational",
+  "style": "whiteboard",
+  "format": "16:9",
+  "fps": 30,
+  "theme": {
+    "accent": "#2563EB",
+    "dark": "#1E293B",
+    "light": "#FFFFFF",
+    "ink": "#0F172A",
+    "paper": "#F8FAFC"
+  },
+  "music": {
+    "mood": "lofi",
+    "bpm": 105,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [],
+    "environments": [],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "whiteboard",
+      "id": "sc_01",
+      "narrative_purpose": "Introduce core question or scientific phenomenon",
+      "visual_description": "Hand-drawn schematic lines rapidly sketch the central concept onto clean parchment.",
+      "camera": "static",
+      "animation_technique": "whiteboard_draw",
+      "concept": "Explain how quantum computers use superposition",
+      "vo": "Have you ever wondered how explain how quantum computers use superposition really works?",
+      "text": "Understanding: Explain how quantum computers use superp...",
+      "bg": "light",
+      "dur": 4.7,
+      "sfx": [
+        {
+          "name": "pop",
+          "at": 0.3,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "motion",
+      "template": "16-line-growth",
+      "id": "sc_02",
+      "narrative_purpose": "Break down mechanism and key relationships",
+      "visual_description": "An evolving trajectory with glowing metric nodes traces the exponential principle.",
+      "camera": "static",
+      "animation_technique": "gsap_motion",
+      "vo": "At its heart, the phenomenon follows an elegant and measurable curve.",
+      "text": "Core Principles & Growth",
+      "bg": "dark",
+      "dur": 5.1,
+      "sfx": [
+        {
+          "name": "ding",
+          "at": 1.2,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "whiteboard",
+      "id": "sc_03",
+      "narrative_purpose": "Synthesize takeaway and broader significance",
+      "visual_description": "Interconnected concept nodes link together with animated arrows forming the complete picture.",
+      "camera": "zoom_out",
+      "animation_technique": "whiteboard_draw",
+      "vo": "When all parts connect, the complex becomes remarkably simple.",
+      "text": "Key Takeaway: The Unified Picture",
+      "bg": "light",
+      "dur": 5.1,
+      "sfx": [
+        {
+          "name": "ding",
+          "at": 0.8,
+          "gain": 0.4
+        }
+      ]
+    }
+  ]
+}

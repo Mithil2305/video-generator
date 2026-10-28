@@ -949,7 +949,574 @@
       cues: () => at.map((t, i) => ({ t, name: chips[i].arrow ? "swish" : "pop", gain: chips[i].arrow ? 0.25 : 0.4 })),
     };
   };
+  // ==============================================================================
+  // UNIVERSAL ANIMATION ENGINE BUILDERS
+  // ==============================================================================
 
+  // Helper for deterministic pseudo-random numbers based on seed
+  const prng = (seed) => {
+    let s = (Math.sin(seed) * 43758.5453123) % 1;
+    return s < 0 ? s + 1 : s;
+  };
+
+  // 1. STORY / NARRATIVE SCENE BUILDER
+  B.story = (ctx) => {
+    const sc = ctx.sc;
+    const canvas = el("canvas", "scene-canvas", ctx.root);
+    canvas.width = W; canvas.height = H;
+    const g = canvas.getContext("2d");
+
+    // Camera move calculation
+    const cam = sc.camera || "pan_left";
+    const particlesType = sc.particles || "dust";
+    const envDesc = (sc.environment || "").toLowerCase();
+    const isMars = envDesc.includes("mars") || envDesc.includes("crimson") || envDesc.includes("red");
+    const isSpace = envDesc.includes("space") || envDesc.includes("cosmic") || envDesc.includes("stars");
+    const isCyber = envDesc.includes("cyber") || envDesc.includes("neon") || envDesc.includes("city");
+    const isForest = envDesc.includes("forest") || envDesc.includes("garden") || envDesc.includes("sanctuary");
+
+    // Subtitle card at bottom
+    const textToShow = sc.text ?? sc.vo ?? "";
+    const subRegion = { x: W * 0.1, y: H * 0.82, w: W * 0.8, h: H * 0.13 };
+    const subWrap = el("div", "story-subtitle", ctx.root);
+    subWrap.style.left = subRegion.x + "px";
+    subWrap.style.top = subRegion.y + "px";
+    subWrap.style.width = subRegion.w + "px";
+    subWrap.style.height = subRegion.h + "px";
+    subWrap.style.transform = "none";
+    const tb = TextBlock(ctx.root, textToShow, {
+      size: H > W ? "s" : "m", color: "#FFFFFF", align: "center", weight: 500, region: subRegion
+    });
+    const times = ctx.times(tb.toks.map((t) => t.text));
+
+    return {
+      update(lt, dur, exitK) {
+        g.clearRect(0, 0, W, H);
+        const kTime = clamp(lt / dur);
+
+        // Camera transform values
+        let camX = 0, camY = 0, camScale = 1.0;
+        if (cam === "pan_left") camX = lerp(W * 0.02, -W * 0.02, kTime);
+        else if (cam === "pan_right") camX = lerp(-W * 0.02, W * 0.02, kTime);
+        else if (cam === "zoom_in") camScale = lerp(1.0, 1.08, kTime);
+        else if (cam === "zoom_out") camScale = lerp(1.08, 1.0, kTime);
+        else if (cam === "tilt_up") camY = lerp(H * 0.02, -H * 0.02, kTime);
+        else if (cam === "drift") { camX = Math.sin(lt * 0.8) * 12 * S; camScale = lerp(1.0, 1.04, kTime); }
+
+        g.save();
+        g.translate(W / 2 + camX, H / 2 + camY);
+        g.scale(camScale, camScale);
+        g.translate(-W / 2, -H / 2);
+
+        // 1. Sky & Atmospheric Backdrop
+        const skyGrad = g.createLinearGradient(0, 0, 0, H);
+        if (isMars) {
+          skyGrad.addColorStop(0, "#1A0606");
+          skyGrad.addColorStop(0.45, "#4A180E");
+          skyGrad.addColorStop(0.75, "#8C341F");
+          skyGrad.addColorStop(1, "#C2542B");
+        } else if (isSpace) {
+          skyGrad.addColorStop(0, "#030308");
+          skyGrad.addColorStop(0.6, "#09091F");
+          skyGrad.addColorStop(1, "#17123A");
+        } else if (isCyber) {
+          skyGrad.addColorStop(0, "#080214");
+          skyGrad.addColorStop(0.6, "#1A0533");
+          skyGrad.addColorStop(1, "#360A5E");
+        } else if (isForest) {
+          skyGrad.addColorStop(0, "#041410");
+          skyGrad.addColorStop(0.6, "#0A2920");
+          skyGrad.addColorStop(1, "#194234");
+        } else {
+          skyGrad.addColorStop(0, theme.dark || "#080F1A");
+          skyGrad.addColorStop(1, shade(theme.dark || "#080F1A", 0.2));
+        }
+        g.fillStyle = skyGrad;
+        g.fillRect(-W * 0.1, -H * 0.1, W * 1.2, H * 1.2);
+
+        // 2. Celestial Body / Sun / Moons
+        if (isMars) {
+          // Phobos moon
+          g.save();
+          g.fillStyle = "rgba(235, 205, 185, 0.85)";
+          g.beginPath(); g.arc(W * 0.75, H * 0.22, 38 * S, 0, Math.PI * 2); g.fill();
+          // Soft moon halo
+          const halo = g.createRadialGradient(W * 0.75, H * 0.22, 30 * S, W * 0.75, H * 0.22, 90 * S);
+          halo.addColorStop(0, "rgba(224, 122, 95, 0.4)"); halo.addColorStop(1, "transparent");
+          g.fillStyle = halo; g.beginPath(); g.arc(W * 0.75, H * 0.22, 90 * S, 0, Math.PI * 2); g.fill();
+          // Deimos tiny moon
+          g.fillStyle = "rgba(240, 220, 200, 0.7)";
+          g.beginPath(); g.arc(W * 0.85, H * 0.14, 12 * S, 0, Math.PI * 2); g.fill();
+          g.restore();
+        } else if (isSpace || isCyber) {
+          // Cosmic glow orb
+          const orb = g.createRadialGradient(W * 0.5, H * 0.35, 10 * S, W * 0.5, H * 0.35, W * 0.45);
+          orb.addColorStop(0, hexA(theme.accent, 0.28)); orb.addColorStop(1, "transparent");
+          g.fillStyle = orb; g.fillRect(0, 0, W, H);
+        }
+
+        // 3. Multi-Layer Terrain / Silhouettes
+        // Layer A: Distant peaks
+        g.fillStyle = isMars ? "#381109" : isCyber ? "#0C061A" : "#0D111A";
+        g.beginPath();
+        g.moveTo(0, H * 0.65);
+        for (let x = 0; x <= W; x += 40) {
+          const ny = Math.sin(x * 0.003 + 1.2) * 45 * S + Math.cos(x * 0.007) * 25 * S;
+          g.lineTo(x, H * 0.6 + ny);
+        }
+        g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+
+        // Layer B: Midground rugged mesas
+        g.fillStyle = isMars ? "#210905" : isCyber ? "#06030D" : "#080B12";
+        g.beginPath();
+        g.moveTo(0, H * 0.76);
+        for (let x = 0; x <= W; x += 30) {
+          const ny = Math.sin(x * 0.005 + 4.1) * 35 * S + Math.sin(x * 0.012) * 15 * S;
+          g.lineTo(x, H * 0.72 + ny);
+        }
+        g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+
+        // Layer C: Foreground surface
+        g.fillStyle = isMars ? "#140503" : "#040508";
+        g.beginPath();
+        g.moveTo(0, H * 0.84);
+        g.quadraticCurveTo(W * 0.4, H * 0.81, W, H * 0.85);
+        g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+
+        // 4. Character / Subject Rendering
+        const charDesc = (sc.character || "").toLowerCase();
+        if (charDesc.includes("robot") || charDesc.includes("unit")) {
+          // Animated Robot Character (Unit 7)
+          const rx = W * 0.52;
+          const ry = H * 0.76 + Math.sin(lt * 2.5) * 4 * S; // subtle hover/breath
+
+          g.save();
+          g.translate(rx, ry);
+
+          // Robot shadow
+          g.fillStyle = "rgba(0,0,0,0.45)";
+          g.beginPath(); g.ellipse(0, 48 * S, 42 * S, 12 * S, 0, 0, Math.PI * 2); g.fill();
+
+          // Torso
+          g.fillStyle = "#334155";
+          g.strokeStyle = "#475569"; g.lineWidth = 3 * S;
+          g.beginPath(); g.roundRect(-24 * S, -30 * S, 48 * S, 56 * S, 12 * S); g.fill(); g.stroke();
+
+          // Chest core meter
+          g.fillStyle = theme.accent;
+          g.beginPath(); g.roundRect(-10 * S, -14 * S, 20 * S, 8 * S, 3 * S); g.fill();
+
+          // Head
+          g.fillStyle = "#1E293B";
+          g.beginPath(); g.roundRect(-20 * S, -74 * S, 40 * S, 36 * S, 10 * S); g.fill(); g.stroke();
+
+          // Antenna
+          g.strokeStyle = "#64748B"; g.lineWidth = 2 * S;
+          g.beginPath(); g.moveTo(0, -74 * S); g.lineTo(0, -92 * S); g.stroke();
+          g.fillStyle = theme.accent;
+          g.beginPath(); g.arc(0, -94 * S, 4 * S, 0, Math.PI * 2); g.fill();
+
+          // Glowing Optic Eye
+          const eyeX = Math.sin(lt * 1.5) * 6 * S;
+          const eyePulse = 0.8 + 0.2 * Math.sin(lt * 4.0);
+          g.fillStyle = "#00E5FF";
+          g.shadowColor = "#00E5FF"; g.shadowBlur = 18 * S * eyePulse;
+          g.beginPath(); g.arc(eyeX, -56 * S, 8 * S, 0, Math.PI * 2); g.fill();
+          g.shadowBlur = 0; // reset shadow
+
+          // Arms / hands gesture
+          if (charDesc.includes("shelter") || charDesc.includes("hand")) {
+            // Cupped protective hands
+            g.strokeStyle = "#64748B"; g.lineWidth = 4 * S;
+            g.beginPath();
+            g.moveTo(-24 * S, -10 * S); g.quadraticCurveTo(-38 * S, 10 * S, -12 * S, 24 * S);
+            g.moveTo(24 * S, -10 * S); g.quadraticCurveTo(38 * S, 10 * S, 12 * S, 24 * S);
+            g.stroke();
+          } else {
+            // Relaxed arms
+            g.strokeStyle = "#475569"; g.lineWidth = 4 * S;
+            g.beginPath();
+            g.moveTo(-24 * S, -10 * S); g.lineTo(-34 * S, 18 * S);
+            g.moveTo(24 * S, -10 * S); g.lineTo(34 * S, 18 * S);
+            g.stroke();
+          }
+
+          // If Garden / Flower is present, render glowing blossom
+          if (charDesc.includes("flower") || charDesc.includes("blossom") || envDesc.includes("garden") || sc.id === "sc_03" || sc.id === "sc_04") {
+            const fx = 0, fy = 20 * S;
+            // Stem
+            g.strokeStyle = "#10B981"; g.lineWidth = 3 * S;
+            g.beginPath(); g.moveTo(fx, fy + 22 * S); g.quadraticCurveTo(fx + 4 * S, fy + 8 * S, fx, fy); g.stroke();
+            // Glowing Petals
+            const bloomK = clamp(prog(lt, 0.4, 1.2));
+            const petalPulse = 1.0 + 0.15 * Math.sin(lt * 3.0);
+            g.fillStyle = "rgba(52, 211, 153, 0.92)";
+            g.shadowColor = "#34D399"; g.shadowBlur = 24 * S * petalPulse;
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 2.5) {
+              const px = fx + Math.cos(angle) * 11 * S * bloomK * petalPulse;
+              const py = fy + Math.sin(angle) * 9 * S * bloomK * petalPulse;
+              g.beginPath(); g.arc(px, py, 6 * S * bloomK, 0, Math.PI * 2); g.fill();
+            }
+            // Golden center
+            g.fillStyle = "#FBBF24"; g.beginPath(); g.arc(fx, fy, 4 * S, 0, Math.PI * 2); g.fill();
+            g.shadowBlur = 0;
+          }
+
+          g.restore();
+        }
+
+        // 5. Atmospheric Floating Particle System (Deterministic math)
+        const pCount = 70;
+        for (let i = 0; i < pCount; i++) {
+          const seedX = prng(i * 19.3);
+          const seedY = prng(i * 47.7);
+          const speed = 0.04 + prng(i * 8.1) * 0.09;
+          const pSize = (1.5 + prng(i * 12.3) * 2.8) * S;
+
+          // Drift positions
+          const px = ((seedX * W + lt * speed * W * 0.4) % (W * 1.2)) - W * 0.1;
+          const py = ((seedY * H - lt * speed * H * 0.25) % (H * 1.2)) + (seedY * H < 0 ? H : 0);
+          const alpha = 0.2 + 0.6 * Math.sin(lt * 2.0 + i);
+
+          if (particlesType === "embers") g.fillStyle = `rgba(251, 146, 60, ${alpha})`;
+          else if (particlesType === "spores" || particlesType === "fireflies") g.fillStyle = `rgba(52, 211, 153, ${alpha})`;
+          else if (particlesType === "stars") g.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+          else g.fillStyle = `rgba(224, 122, 95, ${alpha * 0.5})`; // dust
+
+          g.beginPath(); g.arc(px, py, pSize, 0, Math.PI * 2); g.fill();
+        }
+
+        g.restore(); // restore camera transform
+
+        // 6. Subtitle block update
+        tb.update(lt, times, exitK);
+        setFx(subWrap, 1 - exitK, exitK * 12 * S);
+      },
+      cues: () => tb.cues(times)
+    };
+  };
+
+  // 2. MOTION GRAPHICS SCENE BUILDER (NullMotion Integration)
+  B.motion = (ctx) => {
+    const sc = ctx.sc;
+    const template = sc.template || "16-line-growth";
+    const card = el("div", "motion-card", ctx.root);
+    const cardW = Math.round(W * (H > W ? 0.92 : 0.8));
+    const cardH = Math.round(H * (H > W ? 0.6 : 0.68));
+    card.style.width = cardW + "px"; card.style.height = cardH + "px";
+
+    const canvas = el("canvas", "", card);
+    canvas.width = cardW; canvas.height = cardH;
+    canvas.style.width = "100%"; canvas.style.height = "100%";
+    const g = canvas.getContext("2d");
+
+    // Caption header/footer
+    const textToShow = sc.text ?? sc.vo ?? "";
+    const tb = TextBlock(ctx.root, textToShow, {
+      size: H > W ? "m" : "l", color: theme.paper || "#FFFFFF", align: "center",
+      region: { x: W * 0.08, y: H * (H > W ? 0.08 : 0.07), w: W * 0.84, h: H * 0.14 }
+    });
+    const times = ctx.times(tb.toks.map((t) => t.text));
+
+    return {
+      update(lt, dur, exitK) {
+        g.clearRect(0, 0, cardW, cardH);
+        const kProg = clamp(lt / dur);
+
+        // Chart / Motion template drawing
+        if (template === "16-line-growth" || template === "line") {
+          // Axis & Grid
+          g.strokeStyle = "rgba(255,255,255,0.08)"; g.lineWidth = 1.5 * S;
+          for (let y = cardH * 0.2; y < cardH * 0.85; y += cardH * 0.18) {
+            g.beginPath(); g.moveTo(cardW * 0.1, y); g.lineTo(cardW * 0.9, y); g.stroke();
+          }
+
+          // Growing Curve
+          const pStart = cardW * 0.12, pEnd = cardW * 0.88;
+          const drawK = E.inout3(clamp(lt / (dur * 0.75)));
+          const currentX = lerp(pStart, pEnd, drawK);
+
+          g.save();
+          g.beginPath();
+          g.moveTo(pStart, cardH * 0.78);
+          // Curve path definition
+          for (let x = pStart; x <= currentX; x += 4) {
+            const rel = (x - pStart) / (pEnd - pStart);
+            const y = cardH * (0.78 - 0.55 * Math.pow(rel, 1.6) - 0.06 * Math.sin(rel * Math.PI * 3));
+            g.lineTo(x, y);
+          }
+          // Glowing Stroke
+          g.strokeStyle = theme.accent;
+          g.lineWidth = 6 * S;
+          g.shadowColor = theme.accent; g.shadowBlur = 18 * S;
+          g.stroke();
+
+          // Gradient fill under curve
+          g.lineTo(currentX, cardH * 0.85);
+          g.lineTo(pStart, cardH * 0.85);
+          g.closePath();
+          const areaGrad = g.createLinearGradient(0, cardH * 0.2, 0, cardH * 0.85);
+          areaGrad.addColorStop(0, hexA(theme.accent, 0.35));
+          areaGrad.addColorStop(1, "transparent");
+          g.fillStyle = areaGrad;
+          g.shadowBlur = 0;
+          g.fill();
+          g.restore();
+
+          // Marker points & badges
+          const markers = [
+            { rel: 0.25, val: "+14%" },
+            { rel: 0.60, val: "+48%" },
+            { rel: 0.95, val: "+120%" }
+          ];
+          markers.forEach((m, mi) => {
+            if (drawK >= m.rel) {
+              const mx = lerp(pStart, pEnd, m.rel);
+              const my = cardH * (0.78 - 0.55 * Math.pow(m.rel, 1.6) - 0.06 * Math.sin(m.rel * Math.PI * 3));
+              const mPop = E.back(clamp((drawK - m.rel) / 0.12));
+
+              // Marker ring
+              g.fillStyle = "#FFFFFF";
+              g.beginPath(); g.arc(mx, my, 7 * S * mPop, 0, Math.PI * 2); g.fill();
+
+              // Badge pill
+              const badgeW = 74 * S * mPop, badgeH = 30 * S * mPop;
+              g.fillStyle = "#1E293B"; g.strokeStyle = theme.accent; g.lineWidth = 2 * S;
+              g.beginPath(); g.roundRect(mx - badgeW / 2, my - badgeH - 12 * S, badgeW, badgeH, 6 * S);
+              g.fill(); g.stroke();
+              g.fillStyle = theme.accent; g.font = `600 ${14 * S}px "JetBrains Mono"`;
+              g.textAlign = "center"; g.textBaseline = "middle";
+              g.fillText(m.val, mx, my - badgeH / 2 - 12 * S);
+            }
+          });
+
+        } else if (template === "10-candlestick") {
+          // Financial Candlestick Chart
+          const cols = 9;
+          const colW = (cardW * 0.7) / cols;
+          for (let i = 0; i < cols; i++) {
+            const rel = i / cols;
+            const cK = E.out3(clamp((lt - i * 0.25) / 0.8));
+            if (cK <= 0) continue;
+
+            const cx = cardW * 0.15 + i * colW + colW * 0.5;
+            const isGreen = [1, 2, 4, 5, 7, 8].includes(i);
+            const baseH = cardH * (0.68 - (i * 0.04));
+            const bodyH = (35 + Math.sin(i * 2.3) * 20) * S * cK;
+
+            // Wick
+            g.strokeStyle = isGreen ? "#34D399" : "#F87171";
+            g.lineWidth = 2 * S;
+            g.beginPath();
+            g.moveTo(cx, baseH - bodyH - 18 * S); g.lineTo(cx, baseH + 18 * S);
+            g.stroke();
+
+            // Candle Body
+            g.fillStyle = isGreen ? "#10B981" : "#EF4444";
+            g.beginPath();
+            g.roundRect(cx - colW * 0.32, baseH - bodyH, colW * 0.64, bodyH, 3 * S);
+            g.fill();
+          }
+
+        } else if (template === "13-compare-bars") {
+          // Compare bars (Before 1x vs After 10x)
+          const bar1K = E.out3(clamp(lt / 1.0));
+          const bar2K = E.out3(clamp((lt - 0.4) / 1.2));
+
+          const b1H = cardH * 0.22 * bar1K;
+          const b2H = cardH * 0.62 * bar2K;
+
+          // Bar 1 (Dim)
+          g.fillStyle = "#334155";
+          g.beginPath(); g.roundRect(cardW * 0.28, cardH * 0.78 - b1H, cardW * 0.18, b1H, [10 * S, 10 * S, 0, 0]); g.fill();
+          g.fillStyle = "#94A3B8"; g.font = `600 ${22 * S}px "Inter Tight"`;
+          g.textAlign = "center"; g.fillText("Baseline 1x", cardW * 0.37, cardH * 0.84);
+
+          // Bar 2 (Bloom Accent)
+          const barGrad = g.createLinearGradient(0, cardH * 0.78 - b2H, 0, cardH * 0.78);
+          barGrad.addColorStop(0, "#FFFFFF"); barGrad.addColorStop(0.3, theme.accent); barGrad.addColorStop(1, shade(theme.accent, -0.4));
+          g.fillStyle = barGrad;
+          g.shadowColor = theme.accent; g.shadowBlur = 24 * S;
+          g.beginPath(); g.roundRect(cardW * 0.54, cardH * 0.78 - b2H, cardW * 0.18, b2H, [10 * S, 10 * S, 0, 0]); g.fill();
+          g.shadowBlur = 0;
+          g.fillStyle = "#FFFFFF"; g.fillText("Surge 10x", cardW * 0.63, cardH * 0.84);
+        }
+
+        // Subtitle / Caption
+        tb.update(lt, times, exitK);
+        setFx(card, 1 - exitK, exitK * 10 * S);
+      },
+      cues: () => tb.cues(times)
+    };
+  };
+
+  // 3. CINEMATIC SCENE BUILDER
+  B.cinematic = (ctx) => {
+    const sc = ctx.sc;
+    // Letterbox bars
+    const barTop = el("div", "cinematic-bar top", ctx.root);
+    const barBot = el("div", "cinematic-bar bottom", ctx.root);
+    const flare = el("div", "flare", ctx.root);
+    flare.style.top = H * 0.5 + "px";
+
+    const canvas = el("canvas", "scene-canvas", ctx.root);
+    canvas.width = W; canvas.height = H;
+    const g = canvas.getContext("2d");
+
+    const textToShow = sc.text ?? sc.vo ?? "";
+    const tb = TextBlock(ctx.root, textToShow, {
+      size: "xl", color: "#FFFFFF", align: "center", weight: 600,
+      region: { x: W * 0.1, y: H * 0.38, w: W * 0.8, h: H * 0.28 }
+    });
+    const times = ctx.times(tb.toks.map((t) => t.text));
+
+    return {
+      update(lt, dur, exitK) {
+        g.clearRect(0, 0, W, H);
+        const kTime = clamp(lt / dur);
+
+        // Letterbox slide-in
+        const barIn = E.out3(clamp(lt / 0.8));
+        barTop.style.transform = `translateY(${(-70 * (1 - barIn) * S).toFixed(1)}px)`;
+        barBot.style.transform = `translateY(${(70 * (1 - barIn) * S).toFixed(1)}px)`;
+
+        // Anamorphic horizontal flare sweep
+        const flareX = lerp(-W * 0.2, W * 0.8, kTime);
+        flare.style.transform = `translateX(${flareX.toFixed(1)}px)`;
+        flare.style.opacity = Math.sin(kTime * Math.PI).toFixed(3);
+
+        // Deep cosmic / volumetric background
+        const bgGrad = g.createRadialGradient(W * 0.5, H * 0.5, 20 * S, W * 0.5, H * 0.5, W * 0.6);
+        bgGrad.addColorStop(0, hexA(theme.accent, 0.25));
+        bgGrad.addColorStop(1, "#030408");
+        g.fillStyle = bgGrad; g.fillRect(0, 0, W, H);
+
+        // Starfield particles
+        for (let i = 0; i < 90; i++) {
+          const sx = (prng(i * 17.1) * W + Math.sin(lt * 0.3 + i) * 15 * S) % W;
+          const sy = (prng(i * 31.7) * H + lt * 8 * S) % H;
+          const sa = 0.3 + 0.6 * Math.sin(lt * 3.0 + i);
+          g.fillStyle = `rgba(255, 255, 255, ${sa.toFixed(2)})`;
+          g.beginPath(); g.arc(sx, sy, (1.2 + prng(i * 5.3) * 1.8) * S, 0, Math.PI * 2); g.fill();
+        }
+
+        tb.update(lt, times, exitK);
+        setFx(ctx.root, 1 - exitK, exitK * 14 * S);
+      },
+      cues: () => [
+        { t: 0.1, name: "whoosh", gain: 0.4 },
+        ...tb.cues(times)
+      ]
+    };
+  };
+
+  // 4. WHITEBOARD / EDUCATIONAL DIAGRAM BUILDER
+  B.whiteboard = (ctx) => {
+    const sc = ctx.sc;
+    const canvas = el("canvas", "scene-canvas", ctx.root);
+    canvas.width = W; canvas.height = H;
+    const g = canvas.getContext("2d");
+
+    const textToShow = sc.text ?? sc.vo ?? "";
+    const tb = TextBlock(ctx.root, textToShow, {
+      size: "l", color: isLight(sc.bg) ? "#0F172A" : "#FFFFFF", align: "center",
+      region: { x: W * 0.08, y: H * 0.1, w: W * 0.84, h: H * 0.16 }
+    });
+    const times = ctx.times(tb.toks.map((t) => t.text));
+
+    return {
+      update(lt, dur, exitK) {
+        g.clearRect(0, 0, W, H);
+        const kTime = clamp(lt / dur);
+        const drawK = E.out3(clamp(lt / (dur * 0.7)));
+
+        // Animated Hand-Drawn Diagram Nodes
+        const nodes = [
+          { x: W * 0.28, y: H * 0.52, label: "Input" },
+          { x: W * 0.50, y: H * 0.52, label: "Core Model" },
+          { x: W * 0.72, y: H * 0.52, label: "Insight" }
+        ];
+
+        // Draw connecting sketch arrows
+        g.strokeStyle = theme.accent;
+        g.lineWidth = 4 * S;
+        g.setLineDash([8 * S, 4 * S]);
+
+        if (drawK > 0.2) {
+          const l1K = clamp((drawK - 0.2) / 0.35);
+          g.beginPath();
+          g.moveTo(nodes[0].x + 60 * S, nodes[0].y);
+          g.lineTo(lerp(nodes[0].x + 60 * S, nodes[1].x - 60 * S, l1K), nodes[0].y);
+          g.stroke();
+        }
+        if (drawK > 0.5) {
+          const l2K = clamp((drawK - 0.5) / 0.35);
+          g.beginPath();
+          g.moveTo(nodes[1].x + 60 * S, nodes[1].y);
+          g.lineTo(lerp(nodes[1].x + 60 * S, nodes[2].x - 60 * S, l2K), nodes[1].y);
+          g.stroke();
+        }
+        g.setLineDash([]); // reset dash
+
+        // Draw Nodes
+        nodes.forEach((n, idx) => {
+          const appearAt = 0.15 + idx * 0.28;
+          if (drawK >= appearAt) {
+            const popK = E.back(clamp((drawK - appearAt) / 0.15));
+            g.save();
+            g.translate(n.x, n.y);
+            g.scale(popK, popK);
+
+            // Node Circle
+            g.fillStyle = isLight(sc.bg) ? "#F1F5F9" : "#1E293B";
+            g.strokeStyle = theme.accent;
+            g.lineWidth = 3.5 * S;
+            g.beginPath(); g.arc(0, 0, 52 * S, 0, Math.PI * 2); g.fill(); g.stroke();
+
+            // Label
+            g.fillStyle = isLight(sc.bg) ? "#0F172A" : "#FFFFFF";
+            g.font = `600 ${18 * S}px "Inter Tight"`;
+            g.textAlign = "center"; g.textBaseline = "middle";
+            g.fillText(n.label, 0, 0);
+            g.restore();
+          }
+        });
+
+        tb.update(lt, times, exitK);
+        setFx(ctx.root, 1 - exitK, exitK * 12 * S);
+      },
+      cues: () => [
+        { t: 0.3, name: "pop", gain: 0.3 },
+        { t: 1.2, name: "ding", gain: 0.35 },
+        ...tb.cues(times)
+      ]
+    };
+  };
+
+  // 5. KINETIC TYPOGRAPHY BUILDER (Social / TikTok / High-Energy)
+  B.kinetic = (ctx) => {
+    const sc = ctx.sc;
+    const textToShow = sc.text ?? sc.vo ?? "";
+    const tb = TextBlock(ctx.root, textToShow, {
+      size: H > W ? "xl" : "xxl", color: "#FFFFFF", align: "center", weight: 700,
+      region: { x: W * 0.05, y: H * 0.25, w: W * 0.9, h: H * 0.5 }
+    });
+    const times = ctx.times(tb.toks.map((t) => t.text));
+
+    return {
+      update(lt, dur, exitK) {
+        tb.update(lt, times, exitK);
+        // High-energy pulsating zoom on key beats
+        const beatK = 1.0 + 0.04 * Math.sin(lt * 12.0) * Math.exp(-lt * 0.5);
+        ctx.root.style.transform = `scale(${beatK.toFixed(3)})`;
+        setFx(ctx.root, 1 - exitK, exitK * 16 * S);
+      },
+      cues: () => [
+        { t: 0.05, name: "boom", gain: 0.5 },
+        ...tb.cues(times)
+      ]
+    };
+  };
   // ---------- media ----------
   const mediaCache = {};
   async function preload(src) {

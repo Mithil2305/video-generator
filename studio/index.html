@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Universal Animated Video Studio</title>
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <header>
+    <div class="brand-group">
+      <div class="logo-icon">A</div>
+      <div class="brand-title">ANTIGRAVITY <span>ANIMATION STUDIO</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        Engine Online
+      </div>
+    </div>
+  </header>
+
+  <div class="studio-layout">
+    <!-- Left Sidebar: Creative Brief Engine -->
+    <aside class="brief-panel">
+      <div>
+        <div class="section-title">Creative Prompt</div>
+        <textarea id="promptInput" class="prompt-box" placeholder="Describe the animated video you want to create... (e.g., A lonely robot discovering a blooming garden on Mars, or How Quantum Computers Work)"></textarea>
+      </div>
+
+      <div>
+        <div class="section-title">Inspiration Presets</div>
+        <div class="chips-scroll" id="exampleChips">
+          <!-- Filled by studio.js -->
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-group">
+          <label class="control-label" for="categorySelect">Category</label>
+          <select id="categorySelect" class="select-input">
+            <option value="storytelling">Storytelling & Narrative</option>
+            <option value="educational">Educational & Explainer</option>
+            <option value="business">Business & Marketing</option>
+            <option value="cinematic">Cinematic & Creative</option>
+            <option value="social">Social Media (Reels/Shorts)</option>
+            <option value="specialized">Specialized & Data</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="styleSelect">Visual Style</label>
+          <select id="styleSelect" class="select-input">
+            <option value="cinematic">Cinematic 3D / Atmospheric</option>
+            <option value="cyberpunk">Cyberpunk Neon</option>
+            <option value="anime">Anime Inspired</option>
+            <option value="cartoon">Cartoon / Whimsical</option>
+            <option value="motion_graphics">Obsidian Motion Graphics</option>
+            <option value="whiteboard">Whiteboard & Hand-Drawn</option>
+            <option value="fantasy">Ethereal Fantasy</option>
+            <option value="minimalist">Minimalist Precision</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-group">
+          <label class="control-label" for="formatSelect">Aspect Ratio</label>
+          <select id="formatSelect" class="select-input">
+            <option value="16:9">16:9 Landscape (YouTube/Web)</option>
+            <option value="9:16">9:16 Vertical (Reels/TikTok)</option>
+            <option value="1:1">1:1 Square (Instagram/Feed)</option>
+            <option value="4:5">4:5 Social Portrait</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="moodSelect">Sound Design Mood</label>
+          <select id="moodSelect" class="select-input">
+            <option value="cinematic">Cinematic Ambient Drone</option>
+            <option value="synthwave">Retro Synthwave Groove</option>
+            <option value="lofi">Lo-Fi Chill & Warm Keys</option>
+            <option value="playful">Playful & Upbeat Bounce</option>
+            <option value="suspense">Dark Suspense & Tension</option>
+            <option value="corporate">Crisp Tech Innovation</option>
+            <option value="silent">Silent (SFX Only)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div style="display: flex; justify-content: space-between;">
+          <label class="control-label">Target Duration</label>
+          <span class="slider-val" id="durVal">30s</span>
+        </div>
+        <div class="slider-container">
+          <input type="range" id="durSlider" class="range-slider" min="10" max="90" step="5" value="30">
+        </div>
+      </div>
+
+      <button id="planBtn" class="btn-primary">
+        <span>✨</span> Plan Storyboard
+      </button>
+
+      <div id="renderOptions" style="display: flex; gap: 8px;">
+        <button id="renderBtn" class="btn-primary" style="flex: 2; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+          <span>🎬</span> Render Video
+        </button>
+        <button id="draftBtn" class="btn-secondary" style="flex: 1;" title="Render half-size draft quickly">
+          Draft
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right Workspace: Storyboard & Video Stage -->
+    <main class="main-stage">
+      <div class="view-tabs">
+        <button class="tab-btn active" data-tab="storyboard">Storyboard Plan</button>
+        <button class="tab-btn" data-tab="preview">Video Player & Export</button>
+        <button class="tab-btn" data-tab="validation">Quality Validation</button>
+      </div>
+
+      <!-- Storyboard Tab -->
+      <section id="tab-storyboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 id="projectTitle" style="font-size: 18px; font-weight: 700;">No Storyboard Loaded</h2>
+            <div id="projectMeta" style="font-size: 13px; color: var(--text-dim); margin-top: 2px;">Enter a creative prompt or pick an inspiration preset to begin.</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="addSceneBtn" class="btn-secondary">+ Add Scene</button>
+            <button id="savePlanBtn" class="btn-secondary">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="storyboard-grid" id="scenesContainer">
+          <!-- Populated by studio.js -->
+        </div>
+      </section>
+
+      <!-- Video Player Tab -->
+      <section id="tab-preview" style="display: none;">
+        <div class="player-wrap">
+          <video id="videoPlayer" class="video-elem" controls playsinline>
+            Your browser does not support HTML5 video.
+          </video>
+          <div id="videoPlaceholder" class="video-placeholder">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect width="18" height="14" x="3" y="5" rx="2"/><polygon points="10,9 15,12 10,15"/></svg>
+            <div>No video rendered yet. Press "Render Video" to generate.</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div id="videoInfoText" style="font-size: 14px; color: var(--text-muted);">Format: 1920x1080 | Ready</div>
+          <a id="downloadVideoBtn" class="btn-secondary" href="#" download style="display: none;">Download MP4</a>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <div class="section-title">Live Generation Progress</div>
+          <div id="consoleLog" class="console-box">
+            <div>Ready for generation pipeline.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quality Validation Tab -->
+      <section id="tab-validation" style="display: none;">
+        <div class="validation-card" id="validationReport">
+          <div class="val-header">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 700;">Video Quality Assurance Report</h3>
+              <div style="font-size: 12px; color: var(--text-dim);">Automated FFprobe stream analysis & integrity verification</div>
+            </div>
+            <span id="valBadge" class="val-badge valid">NOT RUN</span>
+          </div>
+          <div id="valChecksList" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+            <!-- Filled by studio.js -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="studio.js"></script>
+</body>
+</html>
