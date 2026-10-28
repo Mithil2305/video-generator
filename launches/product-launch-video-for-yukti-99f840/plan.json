@@ -1,0 +1,119 @@
+{
+  "title": "Product launch video for Yukti...",
+  "prompt": "Product launch video for Yukti autonomous decision intelligence",
+  "category": "business",
+  "style": "motion_graphics",
+  "format": "16:9",
+  "brand": {
+    "name": "Yukti",
+    "mark": "assets/yukti-logo.png"
+  },
+  "target_duration": 15.0,
+  "quality": "draft-heuristic",
+  "planner": "heuristic",
+  "fps": 30,
+  "theme": {
+    "accent": "#329CDA",
+    "dark": "#080F1A",
+    "light": "#F6F9FC",
+    "ink": "#0B0E14",
+    "paper": "#E4EEF6"
+  },
+  "music": {
+    "mood": "corporate",
+    "bpm": 105,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [],
+    "environments": [],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "text",
+      "id": "sc_01",
+      "narrative_purpose": "Hook identifying core business problem",
+      "vo": "Shop closed. [Where did the profit go?]",
+      "bg": "dark",
+      "size": "l",
+      "dur": 3.2,
+      "sfx": [
+        {
+          "name": "pop",
+          "at": 0.2,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "logo",
+      "id": "sc_02",
+      "narrative_purpose": "Brand identity",
+      "vo": "Yukti. Autonomous intelligence for your business.",
+      "tagline": "Autonomous Decision Intelligence.",
+      "bg": "dark",
+      "dur": 3.2,
+      "sfx": [
+        {
+          "name": "shimmer",
+          "at": 0.5,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "ui",
+      "id": "sc_03",
+      "narrative_purpose": "Demonstrate Live Dashboard",
+      "bg": "light",
+      "src": "assets/DashboardPage.mp4",
+      "vo": "Your live dashboard tracks health scores, forecasts, and [key business trends.]",
+      "text": "Live health scores. [Actionable forecasts.]",
+      "side": "top",
+      "cam": "push",
+      "dur": 5.4,
+      "in": 0.0,
+      "speed": 1.0,
+      "toasts": [
+        {
+          "at": 1.5,
+          "title": "Store Health Score",
+          "body": "94/100 -- All systems operating efficiently."
+        }
+      ],
+      "sfx": [
+        {
+          "name": "swish",
+          "at": 0.2,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "sc_04",
+      "narrative_purpose": "Direct call to action",
+      "bg": "dark",
+      "vo": "Start free today -- [yukti.pro]",
+      "text": "Start free today -- [yukti.pro]",
+      "sub": "yukti.pro",
+      "dur": 3.2,
+      "sfx": [
+        {
+          "name": "enter",
+          "at": 0.4,
+          "gain": 0.4
+        }
+      ]
+    }
+  ],
+  "assets_source": "assets\\yukti-assets",
+  "name": "product-launch-video-for-yukti-99f840"
+}

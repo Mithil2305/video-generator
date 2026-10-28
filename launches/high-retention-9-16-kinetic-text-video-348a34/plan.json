@@ -1,0 +1,107 @@
+{
+  "title": "High-retention 9:16 kinetic text video...",
+  "prompt": "High-retention 9:16 kinetic text video revealing the 1 habit that doubles focus.",
+  "category": "social",
+  "style": "motion_graphics",
+  "format": "16:9",
+  "brand": {
+    "name": "High-retention 9:16 kinetic text video...",
+    "mark": null
+  },
+  "target_duration": 30.0,
+  "quality": "draft-heuristic",
+  "planner": "heuristic",
+  "fps": 30,
+  "theme": {
+    "accent": "#38BDF8",
+    "dark": "#0B0F17",
+    "light": "#F8FAFC",
+    "ink": "#0F172A",
+    "paper": "#1E293B"
+  },
+  "music": {
+    "mood": "synthwave",
+    "bpm": 120,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [],
+    "environments": [],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "kinetic",
+      "id": "sc_01",
+      "narrative_purpose": "0-second hook to stop the scroll",
+      "camera": "push",
+      "vo": "Stop scrolling. Here is what you need to know about high-retention 9:16 kinetic text video revealing the 1 habit that doubles focus.",
+      "text": "WAIT. [Watch This.]",
+      "bg": "dark",
+      "dur": 2.5,
+      "sfx": [
+        {
+          "name": "boom",
+          "at": 0.1,
+          "gain": 0.5
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_02",
+      "narrative_purpose": "Rapid value delivery beat 1",
+      "vo": "Most people overlook the key factor that defines this.",
+      "text": "The Key Factor",
+      "bg": "dark",
+      "dur": 7.5,
+      "sfx": [
+        {
+          "name": "pop",
+          "at": 0.3,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_03",
+      "narrative_purpose": "Rapid value delivery beat 2",
+      "vo": "Once you understand this shift, everything changes.",
+      "text": "Shift Your Perspective",
+      "bg": "dark",
+      "dur": 7.5,
+      "sfx": [
+        {
+          "name": "swish",
+          "at": 0.2,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_04",
+      "narrative_purpose": "Retention payoff & CTA",
+      "camera": "zoom_in",
+      "vo": "Save this insight and follow for more.",
+      "text": "Save & Share. [Follow For More.]",
+      "bg": "dark",
+      "dur": 12.5,
+      "sfx": [
+        {
+          "name": "ding",
+          "at": 0.5,
+          "gain": 0.4
+        }
+      ]
+    }
+  ],
+  "name": "high-retention-9-16-kinetic-text-video-348a34"
+}

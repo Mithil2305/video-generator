@@ -1,0 +1,28 @@
+{
+  "name": "smoke-motion-16x9",
+  "format": "16:9",
+  "theme": {
+    "accent": "#38BDF8"
+  },
+  "scenes": [
+    {
+      "type": "motion",
+      "template": "13-compare-bars",
+      "dur": 3,
+      "text": "Comparing Performance Benchmarks",
+      "data": {
+        "bars": [
+          {
+            "label": "Baseline",
+            "value": 100
+          },
+          {
+            "label": "Benchmark",
+            "value": 350
+          }
+        ],
+        "unit": " fps"
+      }
+    }
+  ]
+}

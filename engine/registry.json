@@ -1,0 +1,211 @@
+{
+  "scene_types": [
+    "story",
+    "motion",
+    "cinematic",
+    "whiteboard",
+    "kinetic",
+    "text",
+    "hero",
+    "logo",
+    "ui",
+    "cards",
+    "terminal",
+    "chips"
+  ],
+  "motion_templates": [
+    {
+      "id": "16-line-growth",
+      "status": "implemented",
+      "description": "Smooth growing cubic curve with data points and badges",
+      "schema": {
+        "points": {
+          "type": "array",
+          "required": false,
+          "default": [10, 25, 45, 80, 120]
+        },
+        "markers": {
+          "type": "array",
+          "required": false,
+          "default": []
+        },
+        "title": {
+          "type": "string",
+          "required": false,
+          "default": "Growth Trend"
+        }
+      }
+    },
+    {
+      "id": "13-compare-bars",
+      "status": "implemented",
+      "description": "Comparative metric bars with automated multiplier calculation",
+      "schema": {
+        "bars": {
+          "type": "array",
+          "required": true,
+          "description": "Array of 2 bars { label, value }"
+        },
+        "unit": {
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
+    {
+      "id": "10-candlestick",
+      "status": "implemented",
+      "description": "Financial candlestick price action with wicks and metric readout",
+      "schema": {
+        "title": {
+          "type": "string",
+          "required": false,
+          "default": "Market Structure"
+        },
+        "metric": {
+          "type": "string",
+          "required": false
+        },
+        "candles": {
+          "type": "array",
+          "required": false
+        }
+      }
+    },
+    {
+      "id": "14-leaderboard",
+      "status": "implemented",
+      "description": "Ranked benchmark leaderboard with progress tracks and scores",
+      "schema": {
+        "items": {
+          "type": "array",
+          "required": true,
+          "description": "Array of { rank, name, score }"
+        },
+        "title": {
+          "type": "string",
+          "required": false,
+          "default": "Leaderboard"
+        }
+      }
+    },
+    {
+      "id": "01-cta-pill",
+      "status": "implemented",
+      "description": "Glossy obsidian call-to-action pill with sweeping glint highlight",
+      "schema": {
+        "label": {
+          "type": "string",
+          "required": true
+        },
+        "subcopy": {
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
+    {
+      "id": "02-three-step",
+      "status": "implemented",
+      "description": "Three sequential numbered workflow cards",
+      "schema": {
+        "steps": {
+          "type": "array",
+          "required": true,
+          "description": "Array of 3 step items { step, title, desc }"
+        }
+      }
+    },
+    {
+      "id": "06-notification",
+      "status": "implemented",
+      "description": "Glass notification banner with app icon and time stamp",
+      "schema": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "body": {
+          "type": "string",
+          "required": true
+        },
+        "time": {
+          "type": "string",
+          "required": false,
+          "default": "now"
+        }
+      }
+    },
+    {
+      "id": "18-cta-click",
+      "status": "implemented",
+      "description": "Action button with cursor movement and click response",
+      "schema": {
+        "label": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    {
+      "id": "22-kinetic-headline",
+      "status": "implemented",
+      "description": "High-contrast fast cut kinetic typography sequence",
+      "schema": {
+        "words": {
+          "type": "array",
+          "required": true
+        },
+        "counter": {
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
+    { "id": "03-slide-showcase", "status": "planned", "schema": {} },
+    { "id": "04-morph-panel", "status": "planned", "schema": {} },
+    { "id": "05-app-icons", "status": "planned", "schema": {} },
+    { "id": "07-chat-sim", "status": "planned", "schema": {} },
+    { "id": "08-prompt-bar", "status": "planned", "schema": {} },
+    { "id": "09-grid-network", "status": "planned", "schema": {} },
+    { "id": "12-blur-reveal", "status": "planned", "schema": {} },
+    { "id": "15-bar-3d", "status": "planned", "schema": {} },
+    { "id": "17-integrations-grid", "status": "planned", "schema": {} },
+    { "id": "19-phone-showcase", "status": "planned", "schema": {} },
+    { "id": "20-search-typing", "status": "planned", "schema": {} },
+    { "id": "21-connector-list", "status": "planned", "schema": {} },
+    { "id": "23-prompt-composer", "status": "planned", "schema": {} },
+    { "id": "24-showreel-notify", "status": "planned", "schema": {} },
+    { "id": "26-null-manifesto", "status": "planned", "schema": {} },
+    { "id": "27-cinematic-hud-overlay", "status": "planned", "schema": {} },
+    { "id": "27-icon-stack-rise", "status": "planned", "schema": {} }
+  ],
+  "formats": {
+    "16:9": [1920, 1080],
+    "9:16": [1080, 1920],
+    "1:1": [1080, 1080],
+    "4:5": [1080, 1350]
+  },
+  "sfx": [
+    "whoosh",
+    "swish",
+    "riser",
+    "boom",
+    "pop",
+    "click",
+    "ding",
+    "ping",
+    "key1",
+    "key2",
+    "key3",
+    "enter",
+    "sparkle",
+    "laser",
+    "impact",
+    "glitch",
+    "shimmer"
+  ]
+}

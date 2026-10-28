@@ -75,10 +75,11 @@ def env_key(name, proj):
     for d in (proj, SKILL, os.getcwd()):
         p = os.path.join(d or ".", ".env")
         if os.path.exists(p):
-            for line in open(p):
-                m = re.match(rf"\s*{name}\s*=\s*(.+)\s*$", line)
-                if m:
-                    return m.group(1).strip().strip("'\"")
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    m = re.match(rf"\s*{name}\s*=\s*(.+)\s*$", line)
+                    if m:
+                        return m.group(1).strip().strip("'\"")
     sys.exit(f"{name} is not set. Put it in your environment or in {os.path.join(SKILL, '.env')} as {name}=...")
 
 
@@ -161,12 +162,16 @@ def manifest_path(proj):
 
 def load_manifest(proj):
     p = manifest_path(proj)
-    return json.load(open(p)) if os.path.exists(p) else {}
+    if not os.path.exists(p):
+        return {}
+    with open(p, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def save_manifest(proj, m):
     vo_dir(proj)
-    json.dump(m, open(manifest_path(proj), "w"), indent=1)
+    with open(manifest_path(proj), "w", encoding="utf-8") as f:
+        json.dump(m, f, indent=1)
 
 
 def put_clip(proj, u, src_wav, provider, voice, words=None):
@@ -236,13 +241,17 @@ def gen_eleven(proj, args):
     plan = load_plan(proj)
     us = utterances(plan)
     for k, u in enumerate(us):
-        wav, meta = cached(proj, f"eleven|{args.voice}|{args.model}|{args.speed}|{u['say']}")
+        prev_text = us[k - 1]["say"] if k else ""
+        next_text = us[k + 1]["say"] if k + 1 < len(us) else ""
+        cache_key = (f"eleven|{args.voice}|{args.model}|{args.speed}|{args.stability}|"
+                     f"{prev_text}|{next_text}|{u['say']}")
+        wav, meta = cached(proj, cache_key)
         if not os.path.exists(wav):
             body = {"text": u["say"], "model_id": args.model,
                     "voice_settings": {"stability": args.stability, "similarity_boost": 0.75, "style": 0.0,
                                        "use_speaker_boost": True, "speed": args.speed},
-                    "previous_text": us[k - 1]["say"] if k else None,
-                    "next_text": us[k + 1]["say"] if k + 1 < len(us) else None}
+                    "previous_text": prev_text if k else None,
+                    "next_text": next_text if k + 1 < len(us) else None}
             r = requests.post(f"https://api.elevenlabs.io/v1/text-to-speech/{args.voice}/with-timestamps",
                               params={"output_format": "mp3_44100_128"}, json=body, timeout=180,
                               headers={"xi-api-key": key})
@@ -254,8 +263,12 @@ def gen_eleven(proj, args):
             to_wav(f.name, wav); os.unlink(f.name)
             a = d.get("alignment") or d.get("normalized_alignment")
             words = chars_to_words(a) if a else None
-            json.dump(words, open(meta, "w"))
-        words = json.load(open(meta)) if os.path.exists(meta) else None
+            with open(meta, "w", encoding="utf-8") as mf:
+                json.dump(words, mf)
+        words = None
+        if os.path.exists(meta):
+            with open(meta, "r", encoding="utf-8") as mf:
+                words = json.load(mf)
         put_clip(proj, u, wav, "eleven", args.voice, words)
         print(f"  u{u['id']:02d}  {u['text']}")
 
@@ -428,7 +441,8 @@ AUPHONIC = "https://auphonic.com/api"
 
 
 def file_sha(path):
-    return hashlib.sha1(open(path, "rb").read()).hexdigest()[:16]
+    with open(path, "rb") as f:
+        return hashlib.sha1(f.read()).hexdigest()[:16]
 
 
 def auphonic_algorithms(plan, args):
@@ -486,7 +500,9 @@ def gen_auphonic(proj, args):
     alg = auphonic_algorithms(plan, args)
     d = vo_dir(proj, "auphonic")
     src = os.path.join(d, "input.wav"); write_wav(src, inp)
-    key = hashlib.sha1(open(src, "rb").read() + json.dumps(alg, sort_keys=True).encode()).hexdigest()[:16]
+    with open(src, "rb") as f:
+        src_bytes = f.read()
+    key = hashlib.sha1(src_bytes + json.dumps(alg, sort_keys=True).encode()).hexdigest()[:16]
     res = os.path.join(d, f"{key}.wav")
     secs = len(inp) / SR
     print(f"{len(todo)} take(s), {secs:.1f} s in one production (billed as {max(3.0, secs / 60):.1f} min)")
@@ -651,13 +667,21 @@ def build(proj, _args=None):
         x = fade(level(x, cfg.get("level", -17.0)))
         words = m.get("words")
         script = u["text"].split()
+        allow_est = getattr(_args, "allow_estimated_timing", False) if _args else False
+        is_estimated = False
         if words:
             words = align(script, [{"w": w["w"], "s": w["s"] - cut, "e": w["e"] - cut} for w in words], 0, len(x) / SR)
         else:
             heard = transcribe(x)
-            words = align(script, heard, 0, len(x) / SR) if heard else proportional(script, x)
+            if heard:
+                words = align(script, heard, 0, len(x) / SR)
+            else:
+                if not allow_est:
+                    sys.exit("Error: faster-whisper is required for exact word timing; install with `pip install faster-whisper` or pass `--allow-estimated-timing`")
+                words = proportional(script, x)
+                is_estimated = True
         clips[u["id"]] = (x, words)
-        flag = " (estimated timings: pip install faster-whisper for exact ones)" if all(w.get("guess") for w in words) else ""
+        flag = " (estimated timings)" if (is_estimated or all(w.get("guess") for w in words)) else ""
         print(f"  u{u['id']:02d} {len(x) / SR:5.2f} s  {u['text'][:64]}{flag}")
 
     by_scene = {i: u for u in us for i in u["scenes"]}
@@ -699,11 +723,33 @@ def build(proj, _args=None):
     hold = plan["scenes"][-1].get("hold", cfg.get("hold", 1.3))
     scenes[-1]["end"] = round(scenes[-1]["end"] + hold, 3)
     dur = scenes[-1]["end"]
+
+    # PL-03: check against target_duration if set
+    target_dur = plan.get("target_duration")
+    if target_dur:
+        overrun = dur - target_dur
+        if overrun > target_dur * 0.15:
+            print(f"Warning: voice narration exceeds target duration by {overrun:.1f}s ({dur:.1f}s vs {target_dur:.1f}s target)", file=sys.stderr)
+
     track = np.zeros(int((dur + 1) * SR))
     for a, x in placed:
         s = int(a * SR); track[s: s + len(x)] += x[: len(track) - s]
     write_wav(os.path.join(vo_dir(proj), "vo.wav"), track[: int(dur * SR)])
-    json.dump({"duration": round(dur, 3), "vo": "vo/vo.wav", "scenes": scenes}, open(os.path.join(proj, "timeline.json"), "w"), indent=1)
+
+    # PL-02: calculate SHA-256 of plan.json
+    plan_path = os.path.join(proj, "plan.json")
+    with open(plan_path, "rb") as f:
+        plan_sha256 = hashlib.sha256(f.read()).hexdigest()
+
+    tl_data = {
+        "plan_sha256": plan_sha256,
+        "duration": round(dur, 3),
+        "vo": "vo/vo.wav",
+        "timing": "estimated" if any(all(w.get("guess") for w in s.get("words", [])) for s in scenes if s.get("words")) else "exact",
+        "scenes": scenes
+    }
+    with open(os.path.join(proj, "timeline.json"), "w", encoding="utf-8") as f:
+        json.dump(tl_data, f, indent=1)
     print(f"timeline: {dur:.2f} s, {len(scenes)} scenes -> {os.path.join(proj, 'timeline.json')}")
 
 
@@ -715,8 +761,10 @@ def script(proj, _args=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("script", "build"):
-        sub.add_parser(name).add_argument("project")
+    bld = sub.add_parser("build")
+    bld.add_argument("project")
+    bld.add_argument("--allow-estimated-timing", action="store_true", help="Allow estimated timing without faster-whisper")
+    sub.add_parser("script").add_argument("project")
     r = sub.add_parser("record"); r.add_argument("project"); r.add_argument("--line", type=int); r.add_argument("--device")
     sub.add_parser("devices")
     im = sub.add_parser("import"); im.add_argument("project"); im.add_argument("file")
@@ -726,6 +774,7 @@ def main():
     e = sub.add_parser("eleven"); e.add_argument("project"); e.add_argument("--voice", required=True)
     e.add_argument("--model", default="eleven_multilingual_v2"); e.add_argument("--speed", type=float, default=1.0)
     e.add_argument("--stability", type=float, default=0.45)
+    e.add_argument("--allow-estimated-timing", action="store_true")
     sub.add_parser("eleven-voices")
     ap_ = sub.add_parser("auphonic"); ap_.add_argument("project")
     ap_.add_argument("--denoise", default="dynamic", choices=["dynamic", "classic", "static", "speech_isolation", "off"])
@@ -734,13 +783,14 @@ def main():
     ap_.add_argument("--all", action="store_true", help="also send TTS clips, not just recorded takes")
     ap_.add_argument("--dry-run", action="store_true", help="write the upload file and show the settings; send nothing")
     s = sub.add_parser("say"); s.add_argument("project"); s.add_argument("--voice", default="Reed (English (US))"); s.add_argument("--rate", type=int, default=185)
+    s.add_argument("--allow-estimated-timing", action="store_true")
     a = ap.parse_args()
     proj = os.path.abspath(a.project) if getattr(a, "project", None) else None
-    {"script": lambda: script(proj), "build": lambda: build(proj), "record": lambda: record(proj, a),
-     "devices": lambda: devices(), "import": lambda: import_take(proj, a), "fish": lambda: (gen_fish(proj, a), build(proj)),
-     "fish-voices": lambda: fish_voices(a), "eleven": lambda: (gen_eleven(proj, a), build(proj)),
-     "eleven-voices": lambda: eleven_voices(a), "say": lambda: (gen_say(proj, a), build(proj)),
-     "auphonic": lambda: (gen_auphonic(proj, a), None if a.dry_run else build(proj))}[a.cmd]()
+    {"script": lambda: script(proj), "build": lambda: build(proj, a), "record": lambda: record(proj, a),
+     "devices": lambda: devices(), "import": lambda: import_take(proj, a), "fish": lambda: (gen_fish(proj, a), build(proj, a)),
+     "fish-voices": lambda: fish_voices(a), "eleven": lambda: (gen_eleven(proj, a), build(proj, a)),
+     "eleven-voices": lambda: eleven_voices(a), "say": lambda: (gen_say(proj, a), build(proj, a)),
+     "auphonic": lambda: (gen_auphonic(proj, a), None if a.dry_run else build(proj, a))}[a.cmd]()
 
 
 if __name__ == "__main__":

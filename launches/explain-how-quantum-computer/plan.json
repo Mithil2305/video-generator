@@ -1,10 +1,13 @@
 {
-  "name": "explain-how-quantum-computer",
-  "title": "Explain how quantum computers use superp...",
+  "name": "explain-how-quantum-computers-use-superposition",
+  "title": "quantum computers use superposition",
   "prompt": "Explain how quantum computers use superposition",
   "category": "educational",
   "style": "whiteboard",
   "format": "16:9",
+  "target_duration": 30.0,
+  "quality": "draft-heuristic",
+  "planner": "heuristic",
   "fps": 30,
   "theme": {
     "accent": "#2563EB",
@@ -33,15 +36,12 @@
     {
       "type": "whiteboard",
       "id": "sc_01",
-      "narrative_purpose": "Introduce core question or scientific phenomenon",
-      "visual_description": "Hand-drawn schematic lines rapidly sketch the central concept onto clean parchment.",
+      "narrative_purpose": "Introduce the core question or concept",
       "camera": "static",
-      "animation_technique": "whiteboard_draw",
-      "concept": "Explain how quantum computers use superposition",
-      "vo": "Have you ever wondered how explain how quantum computers use superposition really works?",
-      "text": "Understanding: Explain how quantum computers use superp...",
+      "vo": "Have you ever wondered how quantum computers use superposition works?",
+      "text": "Understanding: quantum computers use superposition",
       "bg": "light",
-      "dur": 4.7,
+      "dur": 9.7,
       "sfx": [
         {
           "name": "pop",
@@ -51,21 +51,17 @@
       ]
     },
     {
-      "type": "motion",
-      "template": "16-line-growth",
+      "type": "whiteboard",
       "id": "sc_02",
       "narrative_purpose": "Break down mechanism and key relationships",
-      "visual_description": "An evolving trajectory with glowing metric nodes traces the exponential principle.",
-      "camera": "static",
-      "animation_technique": "gsap_motion",
-      "vo": "At its heart, the phenomenon follows an elegant and measurable curve.",
-      "text": "Core Principles & Growth",
-      "bg": "dark",
-      "dur": 5.1,
+      "vo": "At its heart, the phenomenon connects through fundamental principles.",
+      "text": "The Underlying Mechanism",
+      "bg": "light",
+      "dur": 10.6,
       "sfx": [
         {
           "name": "ding",
-          "at": 1.2,
+          "at": 1.0,
           "gain": 0.4
         }
       ]
@@ -73,14 +69,12 @@
     {
       "type": "whiteboard",
       "id": "sc_03",
-      "narrative_purpose": "Synthesize takeaway and broader significance",
-      "visual_description": "Interconnected concept nodes link together with animated arrows forming the complete picture.",
+      "narrative_purpose": "Synthesize takeaway",
       "camera": "zoom_out",
-      "animation_technique": "whiteboard_draw",
-      "vo": "When all parts connect, the complex becomes remarkably simple.",
-      "text": "Key Takeaway: The Unified Picture",
+      "vo": "When all parts connect, the picture becomes clear.",
+      "text": "The Complete Picture",
       "bg": "light",
-      "dur": 5.1,
+      "dur": 9.7,
       "sfx": [
         {
           "name": "ding",

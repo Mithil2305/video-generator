@@ -1,5 +1,5 @@
 {
-  "name": "animated-video-generator",
+  "name": "launch-video",
   "version": "2.0.0",
   "private": true,
   "description": "Universal AI Animated Video Generator: Storytelling, Educational, Cinematic, Social, and Marketing Videos from Text Prompts.",
@@ -8,5 +8,11 @@
     "start": "node studio/server.mjs",
     "studio": "node studio/server.mjs",
     "test": "python test/test_generator.py"
+  },
+  "dependencies": {
+    "playwright-core": "1.48.2",
+    "@fontsource/inter-tight": "5.1.0",
+    "@fontsource/instrument-serif": "5.1.0",
+    "@fontsource/jetbrains-mono": "5.1.0"
   }
 }

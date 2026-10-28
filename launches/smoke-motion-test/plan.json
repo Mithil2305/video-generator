@@ -1,0 +1,31 @@
+{
+  "name": "smoke-9x16",
+  "format": "9:16",
+  "theme": {
+    "accent": "#10B981"
+  },
+  "scenes": [
+    {
+      "type": "motion",
+      "template": "16-line-growth",
+      "dur": 3,
+      "text": "Mobile Growth Trajectory",
+      "data": {
+        "points": [
+          15,
+          35,
+          70,
+          120,
+          200
+        ],
+        "title": "Mobile Users",
+        "markers": [
+          {
+            "rel": 0.5,
+            "val": "100k"
+          }
+        ]
+      }
+    }
+  ]
+}

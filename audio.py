@@ -12,14 +12,21 @@ The plan's "music" picks the bed:
 By default the synth bed's beat drops on the first hero/logo scene and thins out under the last scene.
 render.mjs calls `mix` automatically; SFX cues come from the engine (out/cues.json) plus each scene's "sfx".
 """
-import argparse, json, os, subprocess, sys, wave
+import argparse, hashlib, json, os, re, subprocess, sys, wave, zlib
 import numpy as np
 from scipy.signal import butter, sosfilt
 
 SKILL = os.path.dirname(os.path.abspath(__file__))
 SFX_DIR = os.path.join(SKILL, "assets", "sfx")
 SR = 48000
-rng = np.random.default_rng(11)
+
+
+def get_rng(name="default"):
+    seed = zlib.crc32(str(name).encode("utf-8")) & 0xFFFFFFFF
+    return np.random.default_rng(seed)
+
+
+rng = get_rng("default")
 
 
 # ---------- dsp ----------
@@ -54,8 +61,8 @@ def env(n, a, shape=2.0):
     return e
 
 
-def swept(d, f0, f1, q=0.6, steps=40):
-    n = int(d * SR); noise = rng.standard_normal(n + SR // 10); out = np.zeros(n)
+def swept(d, f0, f1, q=0.6, steps=40, seed="swept"):
+    n = int(d * SR); r = get_rng(seed); noise = r.standard_normal(n + SR // 10); out = np.zeros(n)
     blk = n // steps + 1; win = np.hanning(blk * 2)
     for i in range(steps):
         fc = f0 * (f1 / f0) ** (i / max(steps - 1, 1)); s = max(0, i * blk - blk // 2)
@@ -66,7 +73,7 @@ def swept(d, f0, f1, q=0.6, steps=40):
 
 def read_audio(path, ch=2):
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "f32le", "-ac", str(ch), "-ar", str(SR), "-"],
-                         check=True, capture_output=True).stdout
+                         check=True, capture_output=True, timeout=60).stdout
     return np.frombuffer(raw, np.float32).astype(np.float64).reshape(-1, ch)
 
 
@@ -80,16 +87,16 @@ def write_wav(path, x):
 # ---------- sfx kit ----------
 def whoosh(d=0.5, f0=300, f1=5000):
     n = int(d * SR)
-    return stereo(norm(swept(d, f0, f1) * env(n, 0.6) + 0.4 * swept(d, f0 / 2, f1 / 3) * env(n, 0.55, 2.6), -4), -0.6, 0.6)
+    return stereo(norm(swept(d, f0, f1, seed="whoosh1") * env(n, 0.6) + 0.4 * swept(d, f0 / 2, f1 / 3, seed="whoosh2") * env(n, 0.55, 2.6), -4), -0.6, 0.6)
 
 
 def swish(d=0.2):
-    return stereo(norm(swept(d, 2500, 9000, 0.9, 14) * env(int(d * SR), 0.35), -6), 0.4, -0.4)
+    return stereo(norm(swept(d, 2500, 9000, 0.9, 14, seed="swish") * env(int(d * SR), 0.35), -6), 0.4, -0.4)
 
 
 def riser(d=1.0):
     tt = t_(d); f = 160 * 12 ** (tt / d)
-    x = swept(d, 300, 8000, 1.0) * (tt / d) ** 2.4 + np.sin(2 * np.pi * np.cumsum(f) / SR) * (tt / d) ** 3 * 0.3
+    x = swept(d, 300, 8000, 1.0, seed="riser") * (tt / d) ** 2.4 + np.sin(2 * np.pi * np.cumsum(f) / SR) * (tt / d) ** 3 * 0.3
     x[-480:] *= np.linspace(1, 0, 480)
     return stereo(norm(x, -4), -0.3, 0.3)
 
@@ -97,21 +104,22 @@ def riser(d=1.0):
 def boom(d=1.8):
     tt = t_(d); f = 32 + 48 * np.exp(-tt * 9)
     sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 2.8)
-    body = lp(rng.standard_normal(len(tt)), 700) * np.exp(-tt * 12) * 0.6
+    body = lp(get_rng("boom").standard_normal(len(tt)), 700) * np.exp(-tt * 12) * 0.6
     return stereo(norm(np.tanh(1.4 * (sub + body)), -2))
 
 
 def pop(d=0.09):
     tt = t_(d); f = 260 + 900 * np.exp(-tt * 70)
-    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 55) + 0.25 * hp(rng.standard_normal(len(tt)), 3000) * np.exp(-tt * 400)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 55) + 0.25 * hp(get_rng("pop").standard_normal(len(tt)), 3000) * np.exp(-tt * 400)
     return stereo(norm(x, -4))
 
 
 def click(d=0.05):
     x = np.zeros(int(d * SR))
+    r = get_rng("click")
     for at, g in ((0.0, 1.0), (0.011, 0.55)):
         k = t_(0.008); s = int(at * SR)
-        x[s: s + len(k)] += bp(rng.standard_normal(len(k)), 1800, 9000) * np.exp(-k * 700) * g
+        x[s: s + len(k)] += bp(r.standard_normal(len(k)), 1800, 9000) * np.exp(-k * 700) * g
     return stereo(norm(x, -5))
 
 
@@ -125,7 +133,8 @@ def ding(d=0.9):
 
 def key(f=3200, body=180, d=0.045):
     tt = t_(d)
-    x = bp(rng.standard_normal(len(tt)), f * 0.6, f * 2.2) * np.exp(-tt * 900) + np.sin(2 * np.pi * body * tt) * np.exp(-tt * 120) * 0.4
+    r = get_rng(f"key_{f}_{body}")
+    x = bp(r.standard_normal(len(tt)), f * 0.6, f * 2.2) * np.exp(-tt * 900) + np.sin(2 * np.pi * body * tt) * np.exp(-tt * 120) * 0.4
     return stereo(norm(x, -8))
 
 
@@ -148,13 +157,13 @@ def laser(d=0.25):
 def impact(d=1.4):
     tt = t_(d); f = 80 * np.exp(-tt * 6) + 35
     sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 3.5)
-    punch = lp(rng.standard_normal(len(tt)), 350) * np.exp(-tt * 18) * 0.8
+    punch = lp(get_rng("impact").standard_normal(len(tt)), 350) * np.exp(-tt * 18) * 0.8
     return stereo(norm(sub + punch, -2))
 
 
 def glitch(d=0.18):
     tt = t_(d); n = len(tt)
-    x = np.sign(rng.standard_normal(n)) * np.exp(-tt * 25) * 0.4
+    x = np.sign(get_rng("glitch").standard_normal(n)) * np.exp(-tt * 25) * 0.4
     return stereo(norm(bp(x, 400, 7000), -5))
 
 
@@ -175,10 +184,27 @@ KIT = {
 
 def build_kit(force=False):
     os.makedirs(SFX_DIR, exist_ok=True)
+    stamp_path = os.path.join(SFX_DIR, ".stamp")
+    current_stamp = "sfx_v2_" + hashlib.sha256(open(__file__, "rb").read()).hexdigest()[:12]
+    all_exist = all(os.path.exists(os.path.join(SFX_DIR, name + ".wav")) for name in KIT)
+    if not force and all_exist and os.path.exists(stamp_path):
+        try:
+            with open(stamp_path, "r", encoding="utf-8") as f:
+                if f.read().strip() == current_stamp:
+                    return
+        except Exception:
+            pass
+
     for name, fn in KIT.items():
         p = os.path.join(SFX_DIR, name + ".wav")
-        if force or not os.path.exists(p):
+        if force or not os.path.exists(p) or not os.path.exists(stamp_path):
             write_wav(p, np.clip(fn(), -1, 1))
+
+    try:
+        with open(stamp_path, "w", encoding="utf-8") as f:
+            f.write(current_stamp)
+    except Exception:
+        pass
 
 
 def load_sfx(name, cache={}):
@@ -339,12 +365,13 @@ def bed(dur, bpm=112, drop=None, outro=None, transpose=0, mood="corporate"):
                     kick = np.sin(2 * np.pi * np.cumsum(45 + 95 * np.exp(-kk * 30)) / SR) * np.exp(-kk * 9)
                     out[a:a + L] += stereo(np.tanh(kick * 1.6) * 0.5)
                     h = int((t + q * beat + beat / 2) * SR)
+                    bed_rng = get_rng(f"bed_{key}_{bpm}_{mood}")
                     if h < n:
                         Lh = min(int(0.05 * SR), n - h)
-                        out[h:h + Lh] += stereo(hp(rng.standard_normal(Lh), 7000) * np.exp(-np.arange(Lh) / SR * 90) * 0.07, 0.3, 0.3)
+                        out[h:h + Lh] += stereo(hp(bed_rng.standard_normal(Lh), 7000) * np.exp(-np.arange(Lh) / SR * 90) * 0.07, 0.3, 0.3)
                     if q in (1, 3) and b % 2 == 1:
                         Lc = min(int(0.18 * SR), n - a)
-                        clap = bp(rng.standard_normal(Lc), 900, 5000) * np.exp(-np.arange(Lc) / SR * 22) * 0.16
+                        clap = bp(bed_rng.standard_normal(Lc), 900, 5000) * np.exp(-np.arange(Lc) / SR * 22) * 0.16
                         out[a:a + Lc] += stereo(clap)
         t += bar; b += 1
     out *= pump[:, None]
@@ -354,12 +381,33 @@ def bed(dur, bpm=112, drop=None, outro=None, transpose=0, mood="corporate"):
     return norm(out * fade[:, None], -3)
 
 
+_BED_CACHE = {}
+
+
+def get_cached_bed(dur, bpm, drop, outro, key, mood):
+    cache_key = (round(dur, 2), bpm, round(drop, 2) if drop is not None else None,
+                 round(outro, 2) if outro is not None else None, key, mood)
+    if cache_key in _BED_CACHE:
+        return _BED_CACHE[cache_key]
+    b = bed(dur, bpm, drop, outro, key, mood=mood)
+    _BED_CACHE[cache_key] = b
+    return b
+
+
 # ---------- mix ----------
 def mix(proj, t0=0.0, t1=None):
-    plan = json.load(open(os.path.join(proj, "plan.json")))
+    with open(os.path.join(proj, "plan.json"), "r", encoding="utf-8") as f:
+        plan = json.load(f)
     tl_path = os.path.join(proj, "timeline.json")
-    tl = json.load(open(tl_path)) if os.path.exists(tl_path) else None
-    dur = (t1 if t1 is not None else (tl["duration"] if tl else 30.0)) - t0
+    tl = None
+    if os.path.exists(tl_path):
+        with open(tl_path, "r", encoding="utf-8") as f:
+            tl = json.load(f)
+
+    if t1 is None and tl is None:
+        sys.exit("Error: audio mix requires --to or an existing timeline.json")
+
+    dur = (t1 if t1 is not None else tl["duration"]) - t0
     n = int(dur * SR)
     m = plan.get("mix", {})
     out = np.zeros((n, 2))
@@ -385,7 +433,7 @@ def mix(proj, t0=0.0, t1=None):
                 drop = hits[0] if hits else None
             if tl and outro is None:
                 outro = tl["scenes"][-1]["start"]
-            full = bed(t0 + dur, music.get("bpm", 112), drop, outro, music.get("key", 0), mood=music.get("mood", "corporate"))
+            full = get_cached_bed(t0 + dur, music.get("bpm", 112), drop, outro, music.get("key", 0), mood=music.get("mood", "corporate"))
             mus = full[int(t0 * SR): int(t0 * SR) + n]
         # duck under the voice
         e = np.abs(vo[:, 0])
@@ -405,7 +453,8 @@ def mix(proj, t0=0.0, t1=None):
     cues = []
     cp = os.path.join(proj, "out", "cues.json")
     if os.path.exists(cp):
-        cues = json.load(open(cp))
+        with open(cp, "r", encoding="utf-8") as f:
+            cues = json.load(f)
     last = {}
     sg = m.get("sfx", 0.55)
     for c in cues:
@@ -423,15 +472,54 @@ def mix(proj, t0=0.0, t1=None):
         if s < 0:
             continue
         out[s:s + L] += x[:L] * c.get("gain", 0.5) * sg
-    # soft limit
-    peak = np.abs(out).max()
-    if peak > 0.95:
-        out = np.tanh(out / peak * 1.2) / np.tanh(1.2) * 0.95
+
+    # AU-01: Clip safely without tanh global distortion
+    out = np.clip(out, -1.0, 1.0)
     raw = os.path.join(proj, "out", ".mix_raw.wav")
     write_wav(raw, out)
     dst = os.path.join(proj, "out", "mix.wav")
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-ar", str(SR), dst], check=True)
-    os.remove(raw)
+
+    # AU-02: Two-pass loudness normalization with alimiter
+    pass1_cmd = [
+        "ffmpeg", "-v", "error", "-y", "-i", raw,
+        "-af", "alimiter=limit=0.891:attack=5:release=50,loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
+        "-f", "null", "-"
+    ]
+    p1 = subprocess.run(pass1_cmd, capture_output=True, text=True, timeout=60)
+    measured = {}
+    if p1.stderr:
+        m_json = re.search(r"\{[\s\S]*\}", p1.stderr)
+        if m_json:
+            try:
+                measured = json.loads(m_json.group(0))
+            except Exception:
+                pass
+
+    if measured.get("input_i") and measured.get("input_tp"):
+        pass2_cmd = [
+            "ffmpeg", "-v", "error", "-y", "-i", raw,
+            "-af", (
+                f"alimiter=limit=0.891:attack=5:release=50,"
+                f"loudnorm=I=-14:TP=-1.5:LRA=11:"
+                f"measured_I={measured['input_i']}:measured_TP={measured['input_tp']}:"
+                f"measured_LRA={measured['input_lra']}:measured_thresh={measured['input_thresh']}:"
+                f"offset={measured.get('target_offset', 0)}:linear=true"
+            ),
+            "-ar", str(SR), dst
+        ]
+    else:
+        pass2_cmd = [
+            "ffmpeg", "-v", "error", "-y", "-i", raw,
+            "-af", "alimiter=limit=0.891:attack=5:release=50,loudnorm=I=-14:TP=-1.5:LRA=11",
+            "-ar", str(SR), dst
+        ]
+
+    subprocess.run(pass2_cmd, check=True, timeout=60)
+    if os.path.exists(raw):
+        try:
+            os.remove(raw)
+        except Exception:
+            pass
     print(f"mix: {dur:.2f} s, {len(cues)} sfx cues -> {dst}")
 
 

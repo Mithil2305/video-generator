@@ -1085,7 +1085,8 @@
 
         // 4. Character / Subject Rendering
         const charDesc = (sc.character || "").toLowerCase();
-        if (charDesc.includes("robot") || charDesc.includes("unit")) {
+        const hasRobotChar = (P.continuity && P.continuity.characters && P.continuity.characters.some((c) => (c.type || "").includes("robot") || (c.name || "").includes("Unit")));
+        if ((charDesc.includes("robot") || charDesc.includes("unit")) && hasRobotChar) {
           // Animated Robot Character (Unit 7)
           const rx = W * 0.52;
           const ry = H * 0.76 + Math.sin(lt * 2.5) * 4 * S; // subtle hover/breath
@@ -1196,157 +1197,47 @@
     };
   };
 
-  // 2. MOTION GRAPHICS SCENE BUILDER (NullMotion Integration)
+  // 2. MOTION GRAPHICS SCENE BUILDER (NullMotion Adapter Integration)
   B.motion = (ctx) => {
     const sc = ctx.sc;
     const template = sc.template || "16-line-growth";
+    const adapters = window.MotionAdapters || {};
+    const adapter = adapters[template];
+    if (!adapter) {
+      const allowed = Object.keys(adapters).join(", ");
+      throw new Error(`Unknown motion template "${template}". Allowed: ${allowed}`);
+    }
+
+    // Validate scene.data against template schema
+    const validatedData = window.validateSchema(adapter.schema, sc.data || sc, template);
+
     const card = el("div", "motion-card", ctx.root);
     const cardW = Math.round(W * (H > W ? 0.92 : 0.8));
     const cardH = Math.round(H * (H > W ? 0.6 : 0.68));
     card.style.width = cardW + "px"; card.style.height = cardH + "px";
 
-    const canvas = el("canvas", "", card);
-    canvas.width = cardW; canvas.height = cardH;
-    canvas.style.width = "100%"; canvas.style.height = "100%";
-    const g = canvas.getContext("2d");
+    // Mount adapter once into card
+    adapter.mount(card, validatedData, theme, cardW, cardH);
 
     // Caption header/footer
     const textToShow = sc.text ?? sc.vo ?? "";
-    const tb = TextBlock(ctx.root, textToShow, {
-      size: H > W ? "m" : "l", color: theme.paper || "#FFFFFF", align: "center",
-      region: { x: W * 0.08, y: H * (H > W ? 0.08 : 0.07), w: W * 0.84, h: H * 0.14 }
-    });
-    const times = ctx.times(tb.toks.map((t) => t.text));
+    let tb = null;
+    let times = [];
+    if (textToShow) {
+      tb = TextBlock(ctx.root, textToShow, {
+        size: H > W ? "m" : "l", color: theme.paper || "#FFFFFF", align: "center",
+        region: { x: W * 0.08, y: H * (H > W ? 0.08 : 0.07), w: W * 0.84, h: H * 0.14 }
+      });
+      times = ctx.times(tb.toks.map((t) => t.text));
+    }
 
     return {
       update(lt, dur, exitK) {
-        g.clearRect(0, 0, cardW, cardH);
-        const kProg = clamp(lt / dur);
-
-        // Chart / Motion template drawing
-        if (template === "16-line-growth" || template === "line") {
-          // Axis & Grid
-          g.strokeStyle = "rgba(255,255,255,0.08)"; g.lineWidth = 1.5 * S;
-          for (let y = cardH * 0.2; y < cardH * 0.85; y += cardH * 0.18) {
-            g.beginPath(); g.moveTo(cardW * 0.1, y); g.lineTo(cardW * 0.9, y); g.stroke();
-          }
-
-          // Growing Curve
-          const pStart = cardW * 0.12, pEnd = cardW * 0.88;
-          const drawK = E.inout3(clamp(lt / (dur * 0.75)));
-          const currentX = lerp(pStart, pEnd, drawK);
-
-          g.save();
-          g.beginPath();
-          g.moveTo(pStart, cardH * 0.78);
-          // Curve path definition
-          for (let x = pStart; x <= currentX; x += 4) {
-            const rel = (x - pStart) / (pEnd - pStart);
-            const y = cardH * (0.78 - 0.55 * Math.pow(rel, 1.6) - 0.06 * Math.sin(rel * Math.PI * 3));
-            g.lineTo(x, y);
-          }
-          // Glowing Stroke
-          g.strokeStyle = theme.accent;
-          g.lineWidth = 6 * S;
-          g.shadowColor = theme.accent; g.shadowBlur = 18 * S;
-          g.stroke();
-
-          // Gradient fill under curve
-          g.lineTo(currentX, cardH * 0.85);
-          g.lineTo(pStart, cardH * 0.85);
-          g.closePath();
-          const areaGrad = g.createLinearGradient(0, cardH * 0.2, 0, cardH * 0.85);
-          areaGrad.addColorStop(0, hexA(theme.accent, 0.35));
-          areaGrad.addColorStop(1, "transparent");
-          g.fillStyle = areaGrad;
-          g.shadowBlur = 0;
-          g.fill();
-          g.restore();
-
-          // Marker points & badges
-          const markers = [
-            { rel: 0.25, val: "+14%" },
-            { rel: 0.60, val: "+48%" },
-            { rel: 0.95, val: "+120%" }
-          ];
-          markers.forEach((m, mi) => {
-            if (drawK >= m.rel) {
-              const mx = lerp(pStart, pEnd, m.rel);
-              const my = cardH * (0.78 - 0.55 * Math.pow(m.rel, 1.6) - 0.06 * Math.sin(m.rel * Math.PI * 3));
-              const mPop = E.back(clamp((drawK - m.rel) / 0.12));
-
-              // Marker ring
-              g.fillStyle = "#FFFFFF";
-              g.beginPath(); g.arc(mx, my, 7 * S * mPop, 0, Math.PI * 2); g.fill();
-
-              // Badge pill
-              const badgeW = 74 * S * mPop, badgeH = 30 * S * mPop;
-              g.fillStyle = "#1E293B"; g.strokeStyle = theme.accent; g.lineWidth = 2 * S;
-              g.beginPath(); g.roundRect(mx - badgeW / 2, my - badgeH - 12 * S, badgeW, badgeH, 6 * S);
-              g.fill(); g.stroke();
-              g.fillStyle = theme.accent; g.font = `600 ${14 * S}px "JetBrains Mono"`;
-              g.textAlign = "center"; g.textBaseline = "middle";
-              g.fillText(m.val, mx, my - badgeH / 2 - 12 * S);
-            }
-          });
-
-        } else if (template === "10-candlestick") {
-          // Financial Candlestick Chart
-          const cols = 9;
-          const colW = (cardW * 0.7) / cols;
-          for (let i = 0; i < cols; i++) {
-            const rel = i / cols;
-            const cK = E.out3(clamp((lt - i * 0.25) / 0.8));
-            if (cK <= 0) continue;
-
-            const cx = cardW * 0.15 + i * colW + colW * 0.5;
-            const isGreen = [1, 2, 4, 5, 7, 8].includes(i);
-            const baseH = cardH * (0.68 - (i * 0.04));
-            const bodyH = (35 + Math.sin(i * 2.3) * 20) * S * cK;
-
-            // Wick
-            g.strokeStyle = isGreen ? "#34D399" : "#F87171";
-            g.lineWidth = 2 * S;
-            g.beginPath();
-            g.moveTo(cx, baseH - bodyH - 18 * S); g.lineTo(cx, baseH + 18 * S);
-            g.stroke();
-
-            // Candle Body
-            g.fillStyle = isGreen ? "#10B981" : "#EF4444";
-            g.beginPath();
-            g.roundRect(cx - colW * 0.32, baseH - bodyH, colW * 0.64, bodyH, 3 * S);
-            g.fill();
-          }
-
-        } else if (template === "13-compare-bars") {
-          // Compare bars (Before 1x vs After 10x)
-          const bar1K = E.out3(clamp(lt / 1.0));
-          const bar2K = E.out3(clamp((lt - 0.4) / 1.2));
-
-          const b1H = cardH * 0.22 * bar1K;
-          const b2H = cardH * 0.62 * bar2K;
-
-          // Bar 1 (Dim)
-          g.fillStyle = "#334155";
-          g.beginPath(); g.roundRect(cardW * 0.28, cardH * 0.78 - b1H, cardW * 0.18, b1H, [10 * S, 10 * S, 0, 0]); g.fill();
-          g.fillStyle = "#94A3B8"; g.font = `600 ${22 * S}px "Inter Tight"`;
-          g.textAlign = "center"; g.fillText("Baseline 1x", cardW * 0.37, cardH * 0.84);
-
-          // Bar 2 (Bloom Accent)
-          const barGrad = g.createLinearGradient(0, cardH * 0.78 - b2H, 0, cardH * 0.78);
-          barGrad.addColorStop(0, "#FFFFFF"); barGrad.addColorStop(0.3, theme.accent); barGrad.addColorStop(1, shade(theme.accent, -0.4));
-          g.fillStyle = barGrad;
-          g.shadowColor = theme.accent; g.shadowBlur = 24 * S;
-          g.beginPath(); g.roundRect(cardW * 0.54, cardH * 0.78 - b2H, cardW * 0.18, b2H, [10 * S, 10 * S, 0, 0]); g.fill();
-          g.shadowBlur = 0;
-          g.fillStyle = "#FFFFFF"; g.fillText("Surge 10x", cardW * 0.63, cardH * 0.84);
-        }
-
-        // Subtitle / Caption
-        tb.update(lt, times, exitK);
+        adapter.seek(lt);
+        if (tb) tb.update(lt, times, exitK);
         setFx(card, 1 - exitK, exitK * 10 * S);
       },
-      cues: () => tb.cues(times)
+      cues: () => (tb ? tb.cues(times) : [])
     };
   };
 
@@ -1563,11 +1454,28 @@
   // ---------- load / seek ----------
   window.__load = async (data) => {
     P = data.plan; BASE = data.base.endsWith("/") ? data.base : data.base + "/";
+    // Early validation of motion scenes and schemas before any frame is rendered
+    for (let i = 0; i < (P.scenes || []).length; i++) {
+      const sc = P.scenes[i];
+      if (sc.type === "motion") {
+        const tmplId = sc.template || "16-line-growth";
+        const adapters = window.MotionAdapters || {};
+        const adapter = adapters[tmplId];
+        if (!adapter) {
+          const allowed = Object.keys(adapters).join(", ");
+          throw new Error(`[motion] Unknown motion template "${tmplId}". Allowed: ${allowed}`);
+        }
+        if (typeof window.validateSchema === "function") {
+          window.validateSchema(adapter.schema, sc.data || sc, tmplId);
+        }
+      }
+    }
     [W, H] = FORMATS[P.format || "16:9"];
     S = Math.min(W, H) / 1080;
     theme = Object.assign({ accent: "#329CDA", dark: "#000000", light: "#FDFDFD", ink: "#0B0B0C", paper: "#ECEDF1", dotColor: "#E4E4E7" }, P.theme || {});
     brand = Object.assign({ name: "Product" }, P.brand || {});
     stage = document.getElementById("stage");
+    stage.innerHTML = "";
     stage.style.width = W + "px"; stage.style.height = H + "px";
     const root = document.documentElement.style;
     root.setProperty("--s", S); root.setProperty("--accent", theme.accent);
@@ -1575,12 +1483,17 @@
     if (theme.font) root.setProperty("--font", `"${theme.font}"`);
     await Promise.all(["400", "500", "600", "700"].map((w) => document.fonts.load(`${w} 100px "Inter Tight"`)));
     await document.fonts.load(`italic 400 100px "Instrument Serif"`);
-    await document.fonts.load(`400 100px "JetBrains Mono"`);
+    await Promise.all(["400", "600", "700"].map((w) => document.fonts.load(`${w} 100px "JetBrains Mono"`)));
     await document.fonts.ready;
     const srcs = new Set();
     for (const sc of P.scenes) { if (sc.src) srcs.add(sc.src); for (const it of sc.items || []) if (it.src) srcs.add(it.src); }
     await Promise.all([...srcs].map(preload));
-    const TL = data.timeline && data.timeline.scenes && data.timeline.scenes.length === P.scenes.length ? data.timeline : estimate(P);
+    const hasTl = data.timeline && data.timeline.scenes;
+    const countMatches = hasTl && data.timeline.scenes.length === P.scenes.length;
+    if (data.timeline && !countMatches && !data.estimateTiming) {
+      throw new Error(`timeline.json scene count (${data.timeline.scenes ? data.timeline.scenes.length : 0}) does not match plan scenes (${P.scenes.length}). Re-run vo.py build or pass --estimate-timing`);
+    }
+    const TL = (hasTl && countMatches) ? data.timeline : estimate(P);
     if (data.timeline && TL !== data.timeline) console.warn("timeline does not match the plan's scenes; using an estimate");
     scenes = P.scenes.map((sc, i) => {
       const tl = TL.scenes[i];
@@ -1630,7 +1543,13 @@
       if (out === "fade") s.layer.style.opacity = (1 - exitK).toFixed(3);
       for (const v of s.inst.videos || []) {
         const target = Math.max(0, Math.min(v.v.duration - 0.05, v.clipIn + (lt - (v.offset || 0)) * v.speed));
-        if (Math.abs(v.v.currentTime - target) > 0.001) pend.push(new Promise((ok) => { v.v.onseeked = ok; v.v.currentTime = target; setTimeout(ok, 2000); }));
+        if (Math.abs(v.v.currentTime - target) > 0.001) {
+          pend.push(new Promise((ok, bad) => {
+            const timer = setTimeout(() => bad(new Error(`video seek timeout at ${target.toFixed(2)}s`)), 2000);
+            v.v.onseeked = () => { clearTimeout(timer); ok(); };
+            v.v.currentTime = target;
+          }));
+        }
       }
     }
     await Promise.all(pend);

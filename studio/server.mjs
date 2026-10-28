@@ -148,7 +148,7 @@ const server = http.createServer(async (req, res) => {
         valProc.stdout.on("data", (d) => { valOut += d; });
         valProc.on("close", () => {
           let report = null;
-          try { report = JSON.parse(valOut); } catch (e) {}
+          try { report = JSON.parse(valOut); } catch (e) { }
           sendEvent("complete", { success: true, project: projName, validation: report });
           res.end();
         });
@@ -199,7 +199,7 @@ const server = http.createServer(async (req, res) => {
               scenes: (p.scenes || []).length,
               hasVideo: fs.existsSync(videoP)
             });
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     }
@@ -261,7 +261,7 @@ server.on("error", (err) => {
     console.warn(`⚠️ Port ${PORT} is already in use. Retrying on port ${nextPort}...`);
     server.listen(nextPort, () => {
       console.log(`\n======================================================`);
-      console.log(`✨ ANTIGRAVITY ANIMATION STUDIO ONLINE`);
+      console.log(`✨ ANIMATION STUDIO ONLINE`);
       console.log(`🚀 Open in your browser: http://127.0.0.1:${nextPort}`);
       console.log(`======================================================\n`);
     });
@@ -272,7 +272,7 @@ server.on("error", (err) => {
 
 server.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`✨ ANTIGRAVITY ANIMATION STUDIO ONLINE`);
+  console.log(`✨ ANIMATION STUDIO ONLINE`);
   console.log(`🚀 Open in your browser: http://127.0.0.1:${PORT}`);
   console.log(`======================================================\n`);
 });

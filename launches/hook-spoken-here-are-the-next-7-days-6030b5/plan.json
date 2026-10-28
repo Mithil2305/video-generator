@@ -1,0 +1,108 @@
+{
+  "title": "Hook (spoken): Here are the next 7 days...",
+  "prompt": "Hook (spoken): Here are the next 7 days of sales, before you place the order.\nHook (on-screen): Next 7 days. Before you order.\nMain copy:\nHere are the next 7 days of sales, before you place the order. Yukti's sales and demand forecast\nshows your past sales next to the expected sales for the coming days, with a likely range. Each\nforecast has a reliability score, and the model is backtested against your past sales before the\nforecast shows. Know what's coming, then order.\nCTA: See your own 7-day forecast on the free trial. Link in bio.\nWhy it works: Forecast charts are naturally visual. The payoff is the line going forward into dashed\n\"future estimate,\" and the reliability badge answers the first question people ask: can I trust this? The\ncaption says \"backtested,\" which matches what the screen says.\nScreen to record: Sales & Demand Forecasts. Pause on the dashed future line and the reliability badge.\nOn-screen text:\nTime Card\n0:00 Next 7 days, before you order\n0:12 Reliability score on every forecast\n0:20 Know what's coming\n\n\nHigh-retention 9:16 kinetic text video revealing the 1 habit that doubles focus.",
+  "category": "social",
+  "style": "motion_graphics",
+  "format": "9:16",
+  "brand": {
+    "name": "Yukti",
+    "mark": "assets/yukti-logo.png"
+  },
+  "target_duration": 30.0,
+  "quality": "draft-heuristic",
+  "planner": "heuristic",
+  "fps": 30,
+  "theme": {
+    "accent": "#329CDA",
+    "dark": "#080F1A",
+    "light": "#F6F9FC",
+    "ink": "#0B0E14",
+    "paper": "#E4EEF6"
+  },
+  "music": {
+    "mood": "playful",
+    "bpm": 105,
+    "gain": 0.38,
+    "synth": true
+  },
+  "vo": {
+    "pre": 0.12,
+    "post": 0.28,
+    "enabled": true
+  },
+  "continuity": {
+    "characters": [],
+    "environments": [],
+    "props": []
+  },
+  "scenes": [
+    {
+      "type": "kinetic",
+      "id": "sc_01",
+      "narrative_purpose": "0-second hook to stop the scroll",
+      "camera": "push",
+      "vo": "Stop scrolling. Here is what you need to know about hook (spoken): here are the next 7 days of sales, before you place the order.\nhook (on-screen): next 7 days. before you order.\nmain copy:\nhere are the next 7 days of sales, before you place the order. yukti's sales and demand forecast\nshows your past sales next to the expected sales for the coming days, with a likely range. each\nforecast has a reliability score, and the model is backtested against your past sales before the\nforecast shows. know what's coming, then order.\ncta: see your own 7-day forecast on the free trial. link in bio.\nwhy it works: forecast charts are naturally visual. the payoff is the line going forward into dashed\n\"future estimate,\" and the reliability badge answers the first question people ask: can i trust this? the\ncaption says \"backtested,\" which matches what the screen says.\nscreen to record: sales & demand forecasts. pause on the dashed future line and the reliability badge.\non-screen text:\ntime card\n0:00 next 7 days, before you order\n0:12 reliability score on every forecast\n0:20 know what's coming\n\n\nhigh-retention 9:16 kinetic text video revealing the 1 habit that doubles focus.",
+      "text": "WAIT. [Watch This.]",
+      "bg": "dark",
+      "dur": 2.5,
+      "sfx": [
+        {
+          "name": "boom",
+          "at": 0.1,
+          "gain": 0.5
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_02",
+      "narrative_purpose": "Rapid value delivery beat 1",
+      "vo": "Most people overlook the key factor that defines this.",
+      "text": "The Key Factor",
+      "bg": "dark",
+      "dur": 7.5,
+      "sfx": [
+        {
+          "name": "pop",
+          "at": 0.3,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_03",
+      "narrative_purpose": "Rapid value delivery beat 2",
+      "vo": "Once you understand this shift, everything changes.",
+      "text": "Shift Your Perspective",
+      "bg": "dark",
+      "dur": 7.5,
+      "sfx": [
+        {
+          "name": "swish",
+          "at": 0.2,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "type": "kinetic",
+      "id": "sc_04",
+      "narrative_purpose": "Retention payoff & CTA",
+      "camera": "zoom_in",
+      "vo": "Save this insight and follow for more.",
+      "text": "Save & Share. [Follow For More.]",
+      "bg": "dark",
+      "dur": 12.5,
+      "sfx": [
+        {
+          "name": "ding",
+          "at": 0.5,
+          "gain": 0.4
+        }
+      ]
+    }
+  ],
+  "assets_source": "assets\\yukti-assets",
+  "name": "hook-spoken-here-are-the-next-7-days-6030b5"
+}
