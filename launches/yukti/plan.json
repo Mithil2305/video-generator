@@ -1,0 +1,198 @@
+{
+  "name": "yukti-launch",
+  "format": "9:16",
+  "brand": {
+    "name": "Yukti",
+    "mark": "assets/logo.png"
+  },
+  "theme": {
+    "accent": "#329CDA",
+    "dark": "#080F1A",
+    "light": "#F6F9FC",
+    "ink": "#0B0E14",
+    "paper": "#E4EEF6"
+  },
+  "music": {
+    "synth": true,
+    "bpm": 110,
+    "gain": 0.36
+  },
+  "vo": {
+    "pre": 0.10,
+    "post": 0.28,
+    "hold": 1.5
+  },
+  "scenes": [
+    {
+      "type": "text",
+      "bg": "dark",
+      "vo": "Shop closed. Sales were made. [Where did the profit go?]",
+      "pre": 0.25,
+      "size": "l"
+    },
+    {
+      "type": "text",
+      "bg": "dark",
+      "mode": "type",
+      "vo": "Revenue dropped [{12}%] -- and your spreadsheets have no clue.",
+      "size": "l"
+    },
+    {
+      "type": "text",
+      "bg": "dark",
+      "vo": "Your accountant won't tell you. Not until month-end.",
+      "size": "l"
+    },
+    {
+      "type": "hero",
+      "vo": "Meet"
+    },
+    {
+      "type": "logo",
+      "vo": "Yukti. Autonomous decision intelligence for Indian S M B's.",
+      "tagline": "Autonomous Decision Intelligence|for Indian SMBs."
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-voicelog.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "Log your daily sales in seconds -- even by [voice.] Yukti parses it automatically.",
+      "text": "Log by [voice.] Yukti parses it automatically.",
+      "side": "top",
+      "cam": "tilt",
+      "dur": 4.8,
+      "toasts": [
+        {
+          "at": 1.5,
+          "title": "Voice Log Saved",
+          "body": "Sales of Rs. 53,200 parsed and categorized."
+        }
+      ]
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-barcode.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "Scan inventory via camera -- track live stock, and get [instant restock alerts.]",
+      "text": "Scan barcodes. [Instant restock alerts.]",
+      "side": "top",
+      "cam": "push",
+      "dur": 4.5
+    },
+    {
+      "type": "chips",
+      "bg": "dark",
+      "vo": "Powered by Groq and Phi-4 Mini -- finetuned specifically for [business decisions.]",
+      "say": "Powered by Groq and fy four mih-nee -- trained and finetuned specifically for business analysis and decisions.",
+      "items": [
+        "Groq",
+        "->",
+        "Phi-4 Mini",
+        "->",
+        "Finetuned AI",
+        "->",
+        "[Clear Decisions]"
+      ],
+      "dur": 4.5
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-dashboard.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "Your live dashboard tracks health scores, forecasts, and [real India news] context.",
+      "text": "Health scores. Forecasts. [Real India news] context.",
+      "side": "top",
+      "cam": "push",
+      "dur": 4.8
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/AskYuktiPage.png",
+      "vo": "Ask plain-English questions like *Why is revenue down?* -- and get instant [voice answers.]",
+      "text": "Ask plain-English questions. [Hear answers back.]",
+      "side": "top",
+      "cam": "tilt",
+      "dur": 5.0,
+      "typing": [
+        {
+          "at": 0.7,
+          "x": 0.415,
+          "y": 0.933,
+          "text": "Why is revenue down this week?",
+          "size": 0.017,
+          "cps": 18
+        }
+      ]
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-premiumanalysis.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "Executive deep-dive reveals margin leaks, cost trends, and a [what-if simulator.]",
+      "text": "Executive report: margin leaks, [what-if simulator.]",
+      "side": "top",
+      "cam": "pushleft",
+      "dur": 4.8
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-actions.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "Smart alerts recommend exact actions -- with a [closed-loop ledger] to verify results.",
+      "text": "Smart alerts and autopilot. [Closed-loop ledger.]",
+      "side": "top",
+      "cam": "tilt",
+      "dur": 4.8,
+      "toasts": [
+        {
+          "at": 1.5,
+          "title": "Autopilot Ledger",
+          "body": "Action verified: Gross margin stabilized +3.2%"
+        }
+      ]
+    },
+    {
+      "type": "ui",
+      "bg": "light",
+      "src": "assets/clip-pricing.mp4",
+      "in": 0.0,
+      "speed": 1.0,
+      "vo": "No finance team needed. No expensive consultants. Start with a [seven-day free trial.]",
+      "text": "7-day full access trial. [No finance team needed.]",
+      "side": "top",
+      "cam": "push",
+      "dur": 4.5
+    },
+    {
+      "type": "text",
+      "bg": "dark",
+      "vo": "Just [@Yukti.] Turning daily business chaos into [clear decisions.]",
+      "size": "l"
+    },
+    {
+      "type": "logo",
+      "bg": "glow",
+      "vo": "Yukti. Run a smarter business.",
+      "tagline": "Run a smarter business.",
+      "hold": 1.8
+    },
+    {
+      "type": "text",
+      "bg": "dark",
+      "vo": "Start free today -- [yukti dot pro]",
+      "text": "Start free today -- [yukti.pro]",
+      "sub": "yukti.pro"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ SR = 48000
 
 # ---------- plan / script ----------
 def load_plan(proj):
-    with open(os.path.join(proj, "plan.json")) as f:
+    with open(os.path.join(proj, "plan.json"), encoding="utf-8") as f:
         return json.load(f)
 
 

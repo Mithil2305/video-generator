@@ -29,6 +29,25 @@ const fps = Number(opt("fps", draft ? 15 : plan.fps || 30));
 const scale = draft ? 0.5 : Number(opt("scale", 1));
 const workers = Number(opt("workers", 4));
 
+// Auto-resolve ffmpeg path across platforms and ensure Windows PATH includes WinGet links
+if (process.platform === "win32") {
+  const extraPaths = [
+    process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Microsoft", "WinGet", "Links") : null,
+    "C:\\ProgramData\\chocolatey\\bin",
+  ].filter((p) => p && fs.existsSync(p));
+  if (extraPaths.length) {
+    process.env.PATH = `${extraPaths.join(";")};${process.env.PATH}`;
+  }
+}
+
+const FFMPEG = [
+  process.env.FFMPEG,
+  process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "Microsoft", "WinGet", "Links", "ffmpeg.exe") : null,
+  "C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe",
+  "/usr/local/bin/ffmpeg",
+  "/usr/bin/ffmpeg"
+].find((p) => p && fs.existsSync(p)) || "ffmpeg";
+
 const CHROME = [
   process.env.CHROME,
   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -79,7 +98,7 @@ if (flag("board")) {
   const at = info.scenes.map((s) => s.start + Math.min(s.end - s.start - 0.3, Math.max(0.6, (s.end - s.start) * 0.72)));
   const cols = 4, n = Math.ceil(at.length / cols) * cols;
   for (let i = 0; i < n; i++) fs.writeFileSync(path.join(dir, `${String(i).padStart(3, "0")}.jpg`), await shot(page, at[Math.min(i, at.length - 1)]));
-  run("ffmpeg", ["-v", "error", "-y", "-i", path.join(dir, "%03d.jpg"), "-vf", `scale=480:-1,tile=${cols}x${n / cols}:padding=6:color=0x222222`, "-frames:v", "1", path.join(OUT, "board.jpg")]);
+  run(FFMPEG, ["-v", "error", "-y", "-i", path.join(dir, "%03d.jpg"), "-vf", `scale=480:-1,tile=${cols}x${n / cols}:padding=6:color=0x222222`, "-frames:v", "1", path.join(OUT, "board.jpg")]);
   console.log("board", path.join(OUT, "board.jpg"));
   await browser.close(); process.exit(0);
 }
@@ -93,7 +112,7 @@ const started = Date.now();
 let done = 0;
 async function renderRange(k, a, b, pg) {
   const seg = path.join(OUT, `.seg${k}.mp4`); segs[k] = seg;
-  const ff = spawn("ffmpeg", ["-v", "error", "-y", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "-",
+  const ff = spawn(FFMPEG, ["-v", "error", "-y", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "-",
     "-c:v", "libx264", "-preset", draft ? "veryfast" : "medium", "-crf", draft ? "23" : "16", "-pix_fmt", "yuv420p", "-r", String(fps), seg]);
   const closed = new Promise((ok, bad) => ff.on("close", (c) => (c === 0 ? ok() : bad(new Error("ffmpeg segment failed")))));
   for (let f = a; f < b; f++) {
@@ -116,7 +135,7 @@ await browser.close();
 const list = path.join(OUT, ".segs.txt");
 fs.writeFileSync(list, segs.filter(Boolean).map((s) => `file '${s}'`).join("\n"));
 const silent = path.join(OUT, ".video.mp4");
-run("ffmpeg", ["-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", silent]);
+run(FFMPEG, ["-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", silent]);
 segs.forEach((s) => s && fs.rmSync(s, { force: true })); fs.rmSync(list, { force: true });
 
 const final = path.join(OUT, `${name}${draft ? "-draft" : ""}.mp4`);
@@ -127,12 +146,12 @@ if (!flag("no-audio")) {
   const mix = path.join(OUT, "mix.wav");
   if (py.status === 0 && fs.existsSync(mix)) audio = mix; else console.error("audio mix failed; writing a silent video");
 }
-run("ffmpeg", ["-v", "error", "-y", "-i", silent, ...(audio ? ["-i", audio, "-c:a", "aac", "-b:a", "192k", "-shortest"] : []), "-c:v", "copy", "-movflags", "+faststart", final]);
+run(FFMPEG, ["-v", "error", "-y", "-i", silent, ...(audio ? ["-i", audio, "-c:a", "aac", "-b:a", "192k", "-shortest"] : []), "-c:v", "copy", "-movflags", "+faststart", final]);
 fs.rmSync(silent, { force: true });
 console.log("video", final);
 if (!draft) {   // small review copy (Cut Notes / sharing), 720p
   const review = path.join(OUT, `${name}-review.mp4`);
   const kbps = Math.max(800, Math.min(5000, Math.floor((14 * 8192) / Math.max(1, t1 - t0)) - 160));
-  run("ffmpeg", ["-v", "error", "-y", "-i", final, "-vf", "scale=-2:720", "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-maxrate", `${kbps}k`, "-bufsize", `${kbps * 2}k`, "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", review]);
+  run(FFMPEG, ["-v", "error", "-y", "-i", final, "-vf", "scale=-2:720", "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-maxrate", `${kbps}k`, "-bufsize", `${kbps * 2}k`, "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", review]);
   console.log("review", review);
 }

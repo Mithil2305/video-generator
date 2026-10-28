@@ -1,0 +1,960 @@
+{
+ "0": {
+  "text": "Shop closed. Sales were made. Where did the profit go?",
+  "file": "vo\\clips\\u00.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Shop",
+    "s": 0.0,
+    "e": 0.325
+   },
+   {
+    "w": "closed.",
+    "s": 0.395,
+    "e": 0.998
+   },
+   {
+    "w": "Sales",
+    "s": 1.149,
+    "e": 1.521
+   },
+   {
+    "w": "were",
+    "s": 1.567,
+    "e": 1.695
+   },
+   {
+    "w": "made.",
+    "s": 1.73,
+    "e": 2.113
+   },
+   {
+    "w": "Where",
+    "s": 2.438,
+    "e": 2.624
+   },
+   {
+    "w": "did",
+    "s": 2.647,
+    "e": 2.74
+   },
+   {
+    "w": "the",
+    "s": 2.775,
+    "e": 2.844
+   },
+   {
+    "w": "profit",
+    "s": 2.891,
+    "e": 3.274
+   },
+   {
+    "w": "go?",
+    "s": 3.332,
+    "e": 4.087
+   }
+  ]
+ },
+ "1": {
+  "text": "Revenue dropped 12% -- and your spreadsheets have no clue.",
+  "file": "vo\\clips\\u01.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Revenue",
+    "s": 0.0,
+    "e": 0.418
+   },
+   {
+    "w": "dropped",
+    "s": 0.453,
+    "e": 0.778
+   },
+   {
+    "w": "12%",
+    "s": 0.836,
+    "e": 1.474
+   },
+   {
+    "w": "--",
+    "s": 1.8,
+    "e": 1.95
+   },
+   {
+    "w": "and",
+    "s": 2.067,
+    "e": 2.194
+   },
+   {
+    "w": "your",
+    "s": 2.241,
+    "e": 2.357
+   },
+   {
+    "w": "spreadsheets",
+    "s": 2.392,
+    "e": 2.914
+   },
+   {
+    "w": "have",
+    "s": 2.949,
+    "e": 3.1
+   },
+   {
+    "w": "no",
+    "s": 3.158,
+    "e": 3.286
+   },
+   {
+    "w": "clue.",
+    "s": 3.367,
+    "e": 4.133
+   }
+  ]
+ },
+ "2": {
+  "text": "Your accountant won't tell you. Not until month-end.",
+  "file": "vo\\clips\\u02.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Your",
+    "s": 0.0,
+    "e": 0.209
+   },
+   {
+    "w": "accountant",
+    "s": 0.244,
+    "e": 0.697
+   },
+   {
+    "w": "won't",
+    "s": 0.743,
+    "e": 0.929
+   },
+   {
+    "w": "tell",
+    "s": 0.964,
+    "e": 1.149
+   },
+   {
+    "w": "you.",
+    "s": 1.219,
+    "e": 1.509
+   },
+   {
+    "w": "Not",
+    "s": 1.788,
+    "e": 1.985
+   },
+   {
+    "w": "until",
+    "s": 2.032,
+    "e": 2.241
+   },
+   {
+    "w": "month-end.",
+    "s": 2.31,
+    "e": 3.204
+   }
+  ]
+ },
+ "3": {
+  "text": "Meet",
+  "file": "vo\\clips\\u03.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Meet",
+    "s": 0.0,
+    "e": 0.325
+   }
+  ]
+ },
+ "4": {
+  "text": "Yukti. Autonomous decision intelligence for Indian S M B's.",
+  "file": "vo\\clips\\u04.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Yukti.",
+    "s": 0.0,
+    "e": 0.685
+   },
+   {
+    "w": "Autonomous",
+    "s": 0.894,
+    "e": 1.509
+   },
+   {
+    "w": "decision",
+    "s": 1.567,
+    "e": 1.939
+   },
+   {
+    "w": "intelligence",
+    "s": 1.985,
+    "e": 2.566
+   },
+   {
+    "w": "for",
+    "s": 2.601,
+    "e": 2.705
+   },
+   {
+    "w": "Indian",
+    "s": 2.775,
+    "e": 3.135
+   },
+   {
+    "w": "S",
+    "s": 3.228,
+    "e": 3.402
+   },
+   {
+    "w": "M",
+    "s": 3.518,
+    "e": 3.634
+   },
+   {
+    "w": "B's.",
+    "s": 3.704,
+    "e": 4.551
+   }
+  ]
+ },
+ "5": {
+  "text": "Log your daily sales in seconds -- even by voice. Yukti parses it automatically.",
+  "file": "vo\\clips\\u05.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Log",
+    "s": 0.0,
+    "e": 0.325
+   },
+   {
+    "w": "your",
+    "s": 0.383,
+    "e": 0.499
+   },
+   {
+    "w": "daily",
+    "s": 0.557,
+    "e": 0.824
+   },
+   {
+    "w": "sales",
+    "s": 0.882,
+    "e": 1.207
+   },
+   {
+    "w": "in",
+    "s": 1.265,
+    "e": 1.335
+   },
+   {
+    "w": "seconds",
+    "s": 1.416,
+    "e": 1.869
+   },
+   {
+    "w": "--",
+    "s": 1.997,
+    "e": 2.078
+   },
+   {
+    "w": "even",
+    "s": 2.229,
+    "e": 2.496
+   },
+   {
+    "w": "by",
+    "s": 2.554,
+    "e": 2.682
+   },
+   {
+    "w": "voice.",
+    "s": 2.763,
+    "e": 3.32
+   },
+   {
+    "w": "Yukti",
+    "s": 3.646,
+    "e": 4.052
+   },
+   {
+    "w": "parses",
+    "s": 4.133,
+    "e": 4.54
+   },
+   {
+    "w": "it",
+    "s": 4.586,
+    "e": 4.656
+   },
+   {
+    "w": "automatically.",
+    "s": 4.702,
+    "e": 5.851
+   }
+  ]
+ },
+ "6": {
+  "text": "Scan inventory via camera -- track live stock, and get instant restock alerts.",
+  "file": "vo\\clips\\u06.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Scan",
+    "s": 0.0,
+    "e": 0.372
+   },
+   {
+    "w": "inventory",
+    "s": 0.441,
+    "e": 0.998
+   },
+   {
+    "w": "via",
+    "s": 1.068,
+    "e": 1.3
+   },
+   {
+    "w": "camera",
+    "s": 1.358,
+    "e": 1.788
+   },
+   {
+    "w": "--",
+    "s": 1.904,
+    "e": 1.997
+   },
+   {
+    "w": "track",
+    "s": 2.055,
+    "e": 2.334
+   },
+   {
+    "w": "live",
+    "s": 2.415,
+    "e": 2.67
+   },
+   {
+    "w": "stock,",
+    "s": 2.705,
+    "e": 3.077
+   },
+   {
+    "w": "and",
+    "s": 3.1,
+    "e": 3.204
+   },
+   {
+    "w": "get",
+    "s": 3.262,
+    "e": 3.402
+   },
+   {
+    "w": "instant",
+    "s": 3.471,
+    "e": 3.855
+   },
+   {
+    "w": "restock",
+    "s": 3.913,
+    "e": 4.342
+   },
+   {
+    "w": "alerts.",
+    "s": 4.389,
+    "e": 5.201
+   }
+  ]
+ },
+ "7": {
+  "text": "Powered by Groq and Phi-4 Mini -- finetuned specifically for business decisions.",
+  "file": "vo\\clips\\u07.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Powered",
+    "s": 0.0,
+    "e": 0.348
+   },
+   {
+    "w": "by",
+    "s": 0.372,
+    "e": 0.476
+   },
+   {
+    "w": "Groq",
+    "s": 0.546,
+    "e": 0.906
+   },
+   {
+    "w": "and",
+    "s": 0.975,
+    "e": 1.091
+   },
+   {
+    "w": "fy",
+    "s": 1.207,
+    "e": 1.44
+   },
+   {
+    "w": "four",
+    "s": 1.521,
+    "e": 1.718
+   },
+   {
+    "w": "mih-nee",
+    "s": 1.788,
+    "e": 2.183
+   },
+   {
+    "w": "--",
+    "s": 2.392,
+    "e": 2.543
+   },
+   {
+    "w": "trained",
+    "s": 2.601,
+    "e": 3.042
+   },
+   {
+    "w": "and",
+    "s": 3.1,
+    "e": 3.216
+   },
+   {
+    "w": "finetuned",
+    "s": 3.309,
+    "e": 4.063
+   },
+   {
+    "w": "specifically",
+    "s": 4.156,
+    "e": 4.818
+   },
+   {
+    "w": "for",
+    "s": 4.865,
+    "e": 4.981
+   },
+   {
+    "w": "business",
+    "s": 5.039,
+    "e": 5.375
+   },
+   {
+    "w": "analysis",
+    "s": 5.41,
+    "e": 5.979
+   },
+   {
+    "w": "and",
+    "s": 6.037,
+    "e": 6.142
+   },
+   {
+    "w": "decisions.",
+    "s": 6.2,
+    "e": 7.57
+   }
+  ]
+ },
+ "8": {
+  "text": "Your live dashboard tracks health scores, forecasts, and real India news context.",
+  "file": "vo\\clips\\u08.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Your",
+    "s": 0.0,
+    "e": 0.209
+   },
+   {
+    "w": "live",
+    "s": 0.267,
+    "e": 0.569
+   },
+   {
+    "w": "dashboard",
+    "s": 0.615,
+    "e": 1.149
+   },
+   {
+    "w": "tracks",
+    "s": 1.196,
+    "e": 1.544
+   },
+   {
+    "w": "health",
+    "s": 1.602,
+    "e": 1.823
+   },
+   {
+    "w": "scores,",
+    "s": 1.869,
+    "e": 2.426
+   },
+   {
+    "w": "forecasts,",
+    "s": 2.601,
+    "e": 3.495
+   },
+   {
+    "w": "and",
+    "s": 3.611,
+    "e": 3.762
+   },
+   {
+    "w": "real",
+    "s": 3.855,
+    "e": 4.122
+   },
+   {
+    "w": "India",
+    "s": 4.191,
+    "e": 4.505
+   },
+   {
+    "w": "news",
+    "s": 4.574,
+    "e": 4.795
+   },
+   {
+    "w": "context.",
+    "s": 4.853,
+    "e": 6.037
+   }
+  ]
+ },
+ "9": {
+  "text": "Ask plain-English questions like Why is revenue down? -- and get instant voice answers.",
+  "file": "vo\\clips\\u09.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Ask",
+    "s": 0.0,
+    "e": 0.302
+   },
+   {
+    "w": "plain-English",
+    "s": 0.372,
+    "e": 0.964
+   },
+   {
+    "w": "questions",
+    "s": 0.998,
+    "e": 1.463
+   },
+   {
+    "w": "like",
+    "s": 1.521,
+    "e": 1.834
+   },
+   {
+    "w": "Why",
+    "s": 1.985,
+    "e": 2.206
+   },
+   {
+    "w": "is",
+    "s": 2.264,
+    "e": 2.357
+   },
+   {
+    "w": "revenue",
+    "s": 2.415,
+    "e": 2.752
+   },
+   {
+    "w": "down?",
+    "s": 2.786,
+    "e": 3.251
+   },
+   {
+    "w": "--",
+    "s": 3.367,
+    "e": 3.425
+   },
+   {
+    "w": "and",
+    "s": 3.599,
+    "e": 3.727
+   },
+   {
+    "w": "get",
+    "s": 3.785,
+    "e": 3.936
+   },
+   {
+    "w": "instant",
+    "s": 4.005,
+    "e": 4.389
+   },
+   {
+    "w": "voice",
+    "s": 4.447,
+    "e": 4.725
+   },
+   {
+    "w": "answers.",
+    "s": 4.772,
+    "e": 5.991
+   }
+  ]
+ },
+ "10": {
+  "text": "Executive deep-dive reveals margin leaks, cost trends, and a what-if simulator.",
+  "file": "vo\\clips\\u10.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Executive",
+    "s": 0.0,
+    "e": 0.627
+   },
+   {
+    "w": "deep-dive",
+    "s": 0.662,
+    "e": 1.173
+   },
+   {
+    "w": "reveals",
+    "s": 1.207,
+    "e": 1.567
+   },
+   {
+    "w": "margin",
+    "s": 1.66,
+    "e": 1.985
+   },
+   {
+    "w": "leaks,",
+    "s": 2.055,
+    "e": 2.415
+   },
+   {
+    "w": "cost",
+    "s": 2.473,
+    "e": 2.868
+   },
+   {
+    "w": "trends,",
+    "s": 2.937,
+    "e": 3.379
+   },
+   {
+    "w": "and",
+    "s": 3.402,
+    "e": 3.495
+   },
+   {
+    "w": "a",
+    "s": 3.541,
+    "e": 3.564
+   },
+   {
+    "w": "what-if",
+    "s": 3.611,
+    "e": 3.866
+   },
+   {
+    "w": "simulator.",
+    "s": 3.936,
+    "e": 5.108
+   }
+  ]
+ },
+ "11": {
+  "text": "Smart alerts recommend exact actions -- with a closed-loop ledger to verify results.",
+  "file": "vo\\clips\\u11.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Smart",
+    "s": 0.0,
+    "e": 0.36
+   },
+   {
+    "w": "alerts",
+    "s": 0.395,
+    "e": 0.731
+   },
+   {
+    "w": "recommend",
+    "s": 0.789,
+    "e": 1.219
+   },
+   {
+    "w": "exact",
+    "s": 1.3,
+    "e": 1.904
+   },
+   {
+    "w": "actions",
+    "s": 1.974,
+    "e": 2.601
+   },
+   {
+    "w": "--",
+    "s": 2.81,
+    "e": 2.879
+   },
+   {
+    "w": "with",
+    "s": 2.995,
+    "e": 3.158
+   },
+   {
+    "w": "a",
+    "s": 3.193,
+    "e": 3.216
+   },
+   {
+    "w": "closed-loop",
+    "s": 3.286,
+    "e": 3.982
+   },
+   {
+    "w": "ledger",
+    "s": 4.052,
+    "e": 4.4
+   },
+   {
+    "w": "to",
+    "s": 4.47,
+    "e": 4.54
+   },
+   {
+    "w": "verify",
+    "s": 4.598,
+    "e": 5.05
+   },
+   {
+    "w": "results.",
+    "s": 5.132,
+    "e": 6.13
+   }
+  ]
+ },
+ "12": {
+  "text": "No finance team needed. No expensive consultants. Start with a seven-day free trial.",
+  "file": "vo\\clips\\u12.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "No",
+    "s": 0.0,
+    "e": 0.197
+   },
+   {
+    "w": "finance",
+    "s": 0.267,
+    "e": 0.708
+   },
+   {
+    "w": "team",
+    "s": 0.743,
+    "e": 0.929
+   },
+   {
+    "w": "needed.",
+    "s": 0.987,
+    "e": 1.474
+   },
+   {
+    "w": "No",
+    "s": 1.753,
+    "e": 1.904
+   },
+   {
+    "w": "expensive",
+    "s": 1.985,
+    "e": 2.554
+   },
+   {
+    "w": "consultants.",
+    "s": 2.589,
+    "e": 3.367
+   },
+   {
+    "w": "Start",
+    "s": 3.692,
+    "e": 3.959
+   },
+   {
+    "w": "with",
+    "s": 3.982,
+    "e": 4.087
+   },
+   {
+    "w": "a",
+    "s": 4.122,
+    "e": 4.145
+   },
+   {
+    "w": "seven-day",
+    "s": 4.203,
+    "e": 4.632
+   },
+   {
+    "w": "free",
+    "s": 4.702,
+    "e": 4.911
+   },
+   {
+    "w": "trial.",
+    "s": 4.957,
+    "e": 5.712
+   }
+  ]
+ },
+ "13": {
+  "text": "Just @Yukti. Turning daily business chaos into clear decisions.",
+  "file": "vo\\clips\\u13.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Just",
+    "s": 0.0,
+    "e": 0.313
+   },
+   {
+    "w": "@Yukti.",
+    "s": 0.36,
+    "e": 1.091
+   },
+   {
+    "w": "Turning",
+    "s": 1.265,
+    "e": 1.579
+   },
+   {
+    "w": "daily",
+    "s": 1.649,
+    "e": 1.916
+   },
+   {
+    "w": "business",
+    "s": 1.974,
+    "e": 2.287
+   },
+   {
+    "w": "chaos",
+    "s": 2.334,
+    "e": 2.728
+   },
+   {
+    "w": "into",
+    "s": 2.786,
+    "e": 2.949
+   },
+   {
+    "w": "clear",
+    "s": 3.03,
+    "e": 3.274
+   },
+   {
+    "w": "decisions.",
+    "s": 3.344,
+    "e": 4.319
+   }
+  ]
+ },
+ "14": {
+  "text": "Yukti. Run a smarter business.",
+  "file": "vo\\clips\\u14.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Yukti.",
+    "s": 0.0,
+    "e": 0.58
+   },
+   {
+    "w": "Run",
+    "s": 0.964,
+    "e": 1.149
+   },
+   {
+    "w": "a",
+    "s": 1.184,
+    "e": 1.207
+   },
+   {
+    "w": "smarter",
+    "s": 1.277,
+    "e": 1.602
+   },
+   {
+    "w": "business.",
+    "s": 1.649,
+    "e": 2.415
+   }
+  ]
+ },
+ "15": {
+  "text": "Start free today -- yukti dot pro",
+  "file": "vo\\clips\\u15.wav",
+  "provider": "eleven",
+  "voice": "hpp4J3VqNfWAUOO0d1Us",
+  "words": [
+   {
+    "w": "Start",
+    "s": 0.0,
+    "e": 0.302
+   },
+   {
+    "w": "free",
+    "s": 0.348,
+    "e": 0.534
+   },
+   {
+    "w": "today",
+    "s": 0.569,
+    "e": 0.929
+   },
+   {
+    "w": "--",
+    "s": 1.022,
+    "e": 1.08
+   },
+   {
+    "w": "yukti",
+    "s": 1.207,
+    "e": 1.602
+   },
+   {
+    "w": "dot",
+    "s": 1.66,
+    "e": 1.892
+   },
+   {
+    "w": "pro",
+    "s": 1.962,
+    "e": 2.601
+   }
+  ]
+ }
+}
